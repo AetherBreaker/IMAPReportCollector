@@ -31,7 +31,9 @@ class Settings(BaseSettings):
     else SettingsConfigDict()
   )
 
-  sft_ftp_creds_file: Annotated[Path, Field(alias="SFT_FTP_CREDS_FILE")]
+  persisted_dir_loc: Annotated[Path, Field(alias="PERSISTED_DIR_LOC")] = (
+    CWD / "persisted_data" if __debug__ else Path("/app/persisted_data")
+  )
 
   alerts_smtp_server: Annotated[str, Field(alias="ALERTS_SMTP_SERVER")] = "smtppro.zoho.com"
   alerts_smtp_port: Annotated[int, Field(alias="ALERTS_SMTP_PORT")] = 587
@@ -44,4 +46,14 @@ class Settings(BaseSettings):
   watch_email: Annotated[str, Field(alias="WATCH_EMAIL")] = "info@sweetfiretobacco.com"
   watch_email_pwd: Annotated[str, Field(alias="WATCH_EMAIL_PWD")]
 
-  watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 10
+  watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 60
+
+  @property
+  def sft_ftp_creds_file(self) -> Path:
+    if __debug__:
+      fp = CWD / "secrets" / "sft_ftp_creds.json"
+    else:
+      fp = self.persisted_dir_loc / "secrets" / "sft_ftp_creds.json"
+    if not fp.exists() or not fp.is_file():
+      raise FileNotFoundError(f"SFTP/FTP credentials file not found at expected location: {fp}")
+    return fp

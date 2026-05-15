@@ -27,6 +27,7 @@ class ServerNotAvailableError(ConnectionError):
 
 class SFTFTPClient(FTP):
   creds = loads(SETTINGS.sft_ftp_creds_file.read_text())
+  BASE_DIR = PurePosixPath("/FTX Scheduled Reports")
 
   def __enter__(self) -> Self:
     try:
@@ -50,27 +51,29 @@ class SFTFTPClient(FTP):
     self.quit()
 
 
-@handle_fatal_exc_async
+# @handle_fatal_exc_async
 async def direct_email_processing(queue: Queue[MailMessage]) -> NoReturn:
   """Continuously check for new emails and process them."""
   async with TaskGroup() as subtasks:
     while True:
+      logger.info("Waiting for emails to be added to queue...")
       email_data = await queue.get()
-
+      logger.info(f"Email with subject '{email_data.subject}' retrieved from queue for processing.")
       subtasks.create_task(to_thread(process_email, email_data=email_data, queue=queue))
 
 
 # Regex pattern for matching email subjects
 # test - Wed, Apr 8, 2026 3:15 PM
 SUBJECT_PATTERN: Pattern = compile(
-  r"(?P<report_name>.*) - (?P<timestamp>"
+  r"^(Report: )?(?P<report_name>.*) - (?P<timestamp>"
   r"(Mon|Tue|Wed|Thu|Fri|Sat|Sun), "
   r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) "
-  r"\d{1,2}, \d{4} \d{1,2}:\d{2} (AM|PM))"
+  r"\d{1,2}, \d{4} \d{1,2}:\d{2} (AM|PM))$"
 )
 
 
 def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
+  # sourcery skip: extract-method
   """Process a single email message."""
   # Placeholder for actual email processing logic
   logger.info(f"Processing email with subject: {email_data.subject}")
@@ -78,22 +81,34 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
   if match := SUBJECT_PATTERN.match(email_data.subject):
     report_name = match.group("report_name")
     # timestamp = match.group("timestamp")
+    logger.info(f"Email subject matched expected pattern. Extracted report name: '{report_name}'")
 
     try:
       with SFTFTPClient() as ftp_client:
-        # check if the a directory with a name that matches the report name exists on the FTP server, if not create it
-        if report_name not in ftp_client.nlst():
-          ftp_client.mkd(report_name)
+        logger.info(f"Connected to FTP server. Preparing to upload attachments for report '{report_name}'")
+        target_folder = ftp_client.BASE_DIR / report_name
 
-        remote_paths = {PurePosixPath(report_name) / attach.filename: attach.payload for attach in email_data.attachments}
+        # check if the a directory with a name that matches the report name exists on the FTP server, if not create it
+        logger.info(f"Querying FTP for {target_folder}")
+        dirs = [entry for entry in ftp_client.mlsd(path=ftp_client.BASE_DIR.as_posix())]
+        logger.info(f"Query for {target_folder} complete")
+        if str(target_folder) not in dirs:
+          ftp_client.mkd(target_folder.as_posix())
+          logger.info(f"Created new directory on FTP server: {target_folder}")
+
+        logger.info("Directory check complete. Starting attachment upload...")
+
+        remote_paths = {(target_folder / attach.filename): attach.payload for attach in email_data.attachments}
 
         for remote_path, payload in remote_paths.items():
           bio = BytesIO(payload)
-          with ftp_client.transfercmd(f"STOR {remote_path.as_posix()}") as write_file:
+          with ftp_client.transfercmd(f"STOR {remote_path.as_posix()}") as conn:
+            logger.info(f"Transfer initiated for attachment '{remote_path.name}' to '{remote_path.as_posix()}'")
             while buffer := bio.read(8192):
-              write_file.sendall(buffer)
-            if _SSLSocket is not None and isinstance(write_file, _SSLSocket):
-              write_file.unwrap()  # type: ignore
+              conn.sendall(buffer)
+            if _SSLSocket is not None and isinstance(conn, _SSLSocket):
+              conn.unwrap()  # type: ignore
+          logger.info(f"Attachment '{remote_path.name}' uploaded successfully to '{remote_path.as_posix()}'")
           ftp_client.voidresp()
 
         logger.info(f"Successfully processed email '{email_data.subject}' and uploaded attachments to FTP server.")
@@ -103,3 +118,6 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
       # re-add the email to the queue for retry after some delay
       # In a real implementation, you might want to implement an exponential backoff strategy here
       queue.put_nowait(email_data)
+
+  else:
+    logger.warning(f"Email subject '{email_data.subject}' did not match expected pattern. Skipping")

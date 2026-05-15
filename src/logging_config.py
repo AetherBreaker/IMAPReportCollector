@@ -232,25 +232,25 @@ def configure_logging():
   info_file_handler = daily_info_handler if LOGGING_TYPE == "daily" else per_run_info_handler
   info_file_handler.setLevel(logging.INFO)
 
-  # console_error_handler = logging.StreamHandler(sys.stderr)
-  # console_error_handler.setLevel(logging.ERROR)
-  # console_info_handler = logging.StreamHandler(sys.stdout)
-  # console_info_handler.setLevel(logging.INFO)
+  console_error_handler = logging.StreamHandler(sys.stderr)
+  console_error_handler.setLevel(logging.ERROR)
+  console_info_handler = logging.StreamHandler(sys.stdout)
+  console_info_handler.setLevel(logging.INFO)
 
-  console_info_handler = FixedRichHandler(
-    # level=logging.DEBUG if __debug__ else logging.INFO,
-    show_time=platform == "win32",
-    console=RICH_CONSOLE,
-    rich_tracebacks=True,
-    log_time_format=LOGGING_TIMESTAMP_FORMAT,
-  )
+  # console_info_handler = FixedRichHandler(
+  #   # level=logging.DEBUG if __debug__ else logging.INFO,
+  #   show_time=platform == "win32",
+  #   console=RICH_CONSOLE,
+  #   rich_tracebacks=True,
+  #   log_time_format=LOGGING_TIMESTAMP_FORMAT,
+  # )
 
   console_info_handler.setLevel(logging.INFO)
 
   debugging_file_handler.setFormatter(FILE_FORMATTER)
   info_file_handler.setFormatter(FILE_FORMATTER)
-  # console_error_handler.setFormatter(formatter)
-  # console_info_handler.setFormatter(formatter)
+  console_error_handler.setFormatter(FILE_FORMATTER)
+  console_info_handler.setFormatter(FILE_FORMATTER)
 
   log_queue = Queue(-1)
 

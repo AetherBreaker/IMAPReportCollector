@@ -23,11 +23,12 @@ services:
       - type: bind
         source: /data/reports_processing_files/logs
         target: /app/src/logs
+      - type: bind
+        source: /data/reports_processing_files/queue_backups
 
     # Environment variables (customize as needed)
     environment:
       # Override secret file paths to use Docker secrets location
-      - SFT_FTP_CREDS_FILE=/app/secrets/sft_ftp_creds.json
       # Email to Watch
       - WATCH_EMAIL_PWD=${WATCH_EMAIL_PWD:?}
       - WATCH_POLLING_TIMEOUT_SEC=60
