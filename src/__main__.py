@@ -1,7 +1,19 @@
 if __name__ == "__main__":
-  from logging_config import configure_logging
+  from sys import platform
 
-  configure_logging()
+  from logging_config import configure_logging
+  from rich.console import Console
+
+  RICH_CONSOLE = Console(
+    width=None if platform == "win32" else 175,
+    log_time=platform == "win32",
+    force_interactive=False,
+  )
+
+  configure_logging(RICH_CONSOLE)
+else:
+  from logging_config import RICH_CONSOLE
+
 
 from asyncio import TaskGroup, sleep, to_thread
 from asyncio.queues import Queue

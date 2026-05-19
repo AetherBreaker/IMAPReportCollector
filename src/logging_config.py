@@ -1,30 +1,32 @@
-import atexit
+from __future__ import annotations
+
 import logging
 from datetime import datetime
-from logging.handlers import QueueHandler, QueueListener, RotatingFileHandler, TimedRotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 from queue import Queue
-from sys import platform
 from time import gmtime, localtime, strftime, time
-from typing import Literal
+from typing import TYPE_CHECKING
 
-from rich.console import Console, ConsoleRenderable
+from environment_init_vars import SETTINGS
 from rich.logging import RichHandler
-from rich.traceback import Traceback
 
-RICH_CONSOLE = Console(width=None if platform == "win32" else 175, log_time=platform == "win32")
+if TYPE_CHECKING:
+  from rich.console import Console, ConsoleRenderable
+  from rich.traceback import Traceback
 
-CWD = Path.cwd()
 
-logging.getLogger("asyncio").setLevel(logging.DEBUG)
+RICH_CONSOLE: Console = None  # type: ignore
 
 PROJECT_NAME = "IMAPScheduledReportProcessor"
+LOGGING_BASE_NAME = "IMAPScheduledReportProcessor"
 
-max_width = 40
 
+DEFAULT_MAX_WIDTH = 36
 
-LOG_LOC_FOLDER = CWD / "logs"
-LOG_LOC_FOLDER.mkdir(exist_ok=True)
+LOG_LOC_FOLDER = SETTINGS.persisted_dir_loc / "logs"
+DEBUG_LOG_LOC = LOG_LOC_FOLDER / f"{LOGGING_BASE_NAME}_debug.txt"
+INFO_LOG_LOC = LOG_LOC_FOLDER / f"{LOGGING_BASE_NAME}.txt"
 
 MAX_WIDTH_FILE = LOG_LOC_FOLDER / "max_width.txt"
 
@@ -64,6 +66,8 @@ class FixedRichHandler(RichHandler):
       libname_index = 0
 
     path = ".".join(pathpath.parts[libname_index:])
+    if "src." in path:
+      path = path.split("src.", 1)[1]
 
     level = self.get_level_text(record)
     time_format = None if self.formatter is None else self.formatter.datefmt
@@ -83,7 +87,7 @@ class FixedRichHandler(RichHandler):
 
 class FixedLogRecord(logging.LogRecord):
   def __init__(self, *args, **kwargs):
-    global max_width
+    global DEFAULT_MAX_WIDTH
     pathpath = Path(args[2])
 
     if "site-packages" in pathpath.parts:
@@ -106,12 +110,15 @@ class FixedLogRecord(logging.LogRecord):
 
     length = len(libpath)
 
-    if length > max_width:
-      max_width = length
+    if length > DEFAULT_MAX_WIDTH:
+      DEFAULT_MAX_WIDTH = length
       with MAX_WIDTH_FILE.open("w") as f:
-        f.write(str(max_width))
+        f.write(str(DEFAULT_MAX_WIDTH))
 
     self.libname = libname
+    if "src." in libpath:
+      libpath = libpath.split("src.", 1)[1]
+
     self.libpath = libpath
 
     super().__init__(*args, **kwargs)
@@ -119,7 +126,6 @@ class FixedLogRecord(logging.LogRecord):
 
 class FixedFormatter(logging.Formatter):
   default_msec_format = None
-  converter = datetime.fromtimestamp  # type: ignore
 
   def formatTime(self, record, datefmt=None):
     """
@@ -139,11 +145,11 @@ class FixedFormatter(logging.Formatter):
     formatters, for example if you want all logging times to be shown in GMT,
     set the 'converter' attribute in the Formatter class.
     """
-    dt = self.converter(record.created)
+    dt = datetime.fromtimestamp(record.created)
     if datefmt:
-      s = dt.strftime(datefmt)  # type: ignore
+      s = dt.strftime(datefmt)
     else:
-      s = dt.strftime(self.default_time_format)  # type: ignore
+      s = dt.strftime(self.default_time_format)
       if self.default_msec_format:
         s = self.default_msec_format % (s, record.msecs)
     return s
@@ -188,97 +194,78 @@ class CustomTimedRotatingFileHandler(TimedRotatingFileHandler):
     self.rolloverAt = self.computeRollover(currentTime)
 
 
-FILE_FORMATTER = FixedFormatter(
-  fmt=f"{{libpath: <{max_width}}} | [{{asctime}}] | {{levelname: >8}} | {{message}}",
-  datefmt=LOGGING_TIMESTAMP_FORMAT,
-  style="{",
-)
+ROOT = logging.getLogger()
+ROOT.setLevel(logging.DEBUG if __debug__ else logging.INFO)
 
 
-LOGGING_BASE_NAME = "ScheduledOrderMiddleman"
+logging.setLogRecordFactory(FixedLogRecord)
+
+paramiko = logging.getLogger("paramiko")
+paramiko.setLevel(logging.WARNING)
 
 
-DEBUG_LOG_LOC = LOG_LOC_FOLDER / f"{LOGGING_BASE_NAME}_debug.txt"
-INFO_LOG_LOC = LOG_LOC_FOLDER / f"{LOGGING_BASE_NAME}.txt"
+def configure_logging(rich_console: Console):
+  from multiprocessing import parent_process
 
+  if parent_process() is not None:
+    raise RuntimeError("configure_logging should only be called from the main process")
 
-LOGGING_TYPE: Literal["daily", "per_run"] = "daily"
+  import atexit
+  from logging.handlers import QueueHandler, QueueListener
+  from sys import platform
 
+  from rich.traceback import install
 
-daily_debug_handler = CustomTimedRotatingFileHandler(DEBUG_LOG_LOC, when="midnight", backupCount=14, delay=True)
-daily_info_handler = CustomTimedRotatingFileHandler(INFO_LOG_LOC, when="midnight", backupCount=14, delay=True)
+  global RICH_CONSOLE
+  RICH_CONSOLE = rich_console
 
-per_run_debug_handler = RotatingFileHandler(DEBUG_LOG_LOC, maxBytes=0, backupCount=30, delay=True)
-per_run_info_handler = RotatingFileHandler(INFO_LOG_LOC, maxBytes=0, backupCount=30, delay=True)
+  LOG_LOC_FOLDER.mkdir(exist_ok=True, parents=True)
 
-if LOGGING_TYPE == "per_run":
-  per_run_debug_handler.doRollover()
-  per_run_info_handler.doRollover()
+  install(show_locals=True)
 
+  debug_file_handler = CustomTimedRotatingFileHandler(DEBUG_LOG_LOC, when="midnight", backupCount=14, delay=True)
+  info_file_handler = CustomTimedRotatingFileHandler(INFO_LOG_LOC, when="midnight", backupCount=14, delay=True)
 
-def configure_logging():
-  logging.setLogRecordFactory(FixedLogRecord)
-
-  paramiko = logging.getLogger("paramiko")
-  paramiko.setLevel(logging.WARNING)
-
-  root = logging.getLogger()
-  root.setLevel(logging.DEBUG if __debug__ else logging.INFO)
-  # root.setLevel(logging.DEBUG)
-
-  debugging_file_handler = daily_debug_handler if LOGGING_TYPE == "daily" else per_run_debug_handler
-  debugging_file_handler.setLevel(logging.DEBUG)
-
-  info_file_handler = daily_info_handler if LOGGING_TYPE == "daily" else per_run_info_handler
+  debug_file_handler.setLevel(logging.DEBUG)
   info_file_handler.setLevel(logging.INFO)
 
-  console_error_handler = logging.StreamHandler(sys.stderr)
-  console_error_handler.setLevel(logging.ERROR)
-  console_info_handler = logging.StreamHandler(sys.stdout)
+  file_formatter = FixedFormatter(
+    fmt=f"{{libpath: <{DEFAULT_MAX_WIDTH}}} | [{{asctime}}] | {{levelname: >8}} | {{message}}",
+    datefmt=LOGGING_TIMESTAMP_FORMAT,
+    style="{",
+  )
+
+  debug_file_handler.setFormatter(file_formatter)
+  info_file_handler.setFormatter(file_formatter)
+
+  console_info_handler = FixedRichHandler(
+    # level=logging.DEBUG if __debug__ else logging.INFO,
+    show_time=platform == "win32",
+    console=rich_console,
+    rich_tracebacks=True,
+    log_time_format=LOGGING_TIMESTAMP_FORMAT,
+    tracebacks_show_locals=True,
+  )
+
   console_info_handler.setLevel(logging.INFO)
 
-  # console_info_handler = FixedRichHandler(
-  #   # level=logging.DEBUG if __debug__ else logging.INFO,
-  #   show_time=platform == "win32",
-  #   console=RICH_CONSOLE,
-  #   rich_tracebacks=True,
-  #   log_time_format=LOGGING_TIMESTAMP_FORMAT,
-  # )
+  file_log_queue = Queue(-1)
 
-  console_info_handler.setLevel(logging.INFO)
+  queue_handler = QueueHandler(file_log_queue)
 
-  debugging_file_handler.setFormatter(FILE_FORMATTER)
-  info_file_handler.setFormatter(FILE_FORMATTER)
-  console_error_handler.setFormatter(FILE_FORMATTER)
-  console_info_handler.setFormatter(FILE_FORMATTER)
+  ROOT.addHandler(console_info_handler)
 
-  log_queue = Queue(-1)
-
-  queue_handler = QueueHandler(log_queue)
-
-  queue_listener = QueueListener(
-    log_queue,
-    debugging_file_handler,
+  file_queue_listener = QueueListener(
+    file_log_queue,
+    debug_file_handler,
     info_file_handler,
     respect_handler_level=True,
   )
 
-  # root.addHandler(debugging_file_handler)
-  # root.addHandler(info_file_handler)
-  root.addHandler(queue_handler)
-  # root.addHandler(console_error_handler)
-  root.addHandler(console_info_handler)
+  ROOT.addHandler(queue_handler)
 
-  queue_listener.start()
+  file_queue_listener.start()
 
-  atexit.register(queue_listener.stop)
+  atexit.register(file_queue_listener.stop)
 
-  # if __debug__:
-  #   console_debug_handler = FixedRichHandler(
-  #     level=logging.DEBUG,
-  #     console=RICH_CONSOLE,
-  #     rich_tracebacks=True,
-  #     log_time_format=logging_timestamp_fmt,
-  #   )
-  #   # console_debug_handler.setFormatter(formatter)
-  #   root.addHandler(console_debug_handler)
+  return file_log_queue
