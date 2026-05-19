@@ -7,6 +7,7 @@ requires-python = ">=3.14"
 dependencies = [
     "aiologic==0.16.*",
     "imap-tools>=1.11.1",
+    "paramiko>=5.0.0",
     "pydantic==2.*",
     "pydantic-settings==2.*",
     "rich==14.*",
