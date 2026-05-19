@@ -48,7 +48,7 @@ def handle_fatal_exc_sync[**TP, TR](func: Callable[TP, TR]) -> Callable[TP, TR |
       FATAL_EVENT.set()
       return None
 
-  return wrapper
+  return func if __debug__ else wrapper
 
 
 def handle_fatal_exc_async[**TP, TR](func: Callable[TP, Coroutine[None, None, TR]]) -> Callable[TP, Coroutine[None, None, TR | None]]:
@@ -79,4 +79,4 @@ def handle_fatal_exc_async[**TP, TR](func: Callable[TP, Coroutine[None, None, TR
       FATAL_EVENT.set()
       return None
 
-  return wrapper
+  return func if __debug__ else wrapper
