@@ -21,6 +21,7 @@ class Settings(BaseSettings):
       env_file=CWD / ".env",
       env_file_encoding="utf-8",
       env_ignore_empty=True,
+      extra="ignore",
     )
     if __debug__
     else SettingsConfigDict()
