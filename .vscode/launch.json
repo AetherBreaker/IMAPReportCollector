@@ -13,13 +13,11 @@
             "cwd": "${workspaceFolder}",
             "envFile": "${workspaceFolder}/.env",
             "env": {
+                "PYTHONPATH": "${workspaceFolder}\\src",
+                "PYTHONPYCACHEPREFIX": "${workspaceFolder}\\PYCACHE",
+                "PYTHONUNBUFFERED": "1",
                 "SFT_FTP_CREDS_FILE": "${workspaceFolder}\\secrets\\sft_ftp_creds.json"
-            },
-            "pythonArgs": [
-                "-X",
-                "pycache_prefix=${workspaceFolder}\\PYCACHE",
-                "-u"
-            ]
+            }
         },
         {
             "name": "Current File",
@@ -32,13 +30,10 @@
             "envFile": "${workspaceFolder}/.env",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}\\src",
+                "PYTHONPYCACHEPREFIX": "${workspaceFolder}\\PYCACHE",
+                "PYTHONUNBUFFERED": "1",
                 "SFT_FTP_CREDS_FILE": "${workspaceFolder}\\secrets\\sft_ftp_creds.json"
-            },
-            "pythonArgs": [
-                "-X",
-                "pycache_prefix=${workspaceFolder}\\PYCACHE",
-                "-u"
-            ]
+            }
         }
     ]
 }

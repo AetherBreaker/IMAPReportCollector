@@ -225,3 +225,4 @@ logs/**
 attachments_dl/**
 *.json
 *.env
+persisted_data/
