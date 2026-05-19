@@ -29,7 +29,6 @@ from environment_init_vars import FATAL_EVENT
 from err_handling import handle_fatal_exc_async
 from imap_tools import MailMessage
 from logging_config import RICH_CONSOLE
-from rich_custom import LiveCustom
 
 logger = getLogger(__name__)
 
@@ -62,34 +61,33 @@ async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
 
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   RICH_CONSOLE.rule("[bold red]Booting...[/]", style="bold red")
-  with LiveCustom(refresh_per_second=10, console=RICH_CONSOLE):
-    # Write initial heartbeat on startup
-    write_heartbeat()
+  # Write initial heartbeat on startup
+  write_heartbeat()
 
-    emails_to_process_queue: Queue[MailMessage] = Queue()
+  emails_to_process_queue: Queue[MailMessage] = Queue()
 
-    async with TaskGroup() as main_tasks:
-      periodic_heartbeat_task = main_tasks.create_task(run_periodic(30, write_heartbeat))
-      email_processing_task = main_tasks.create_task(direct_email_processing(emails_to_process_queue))
-      imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
+  async with TaskGroup() as main_tasks:
+    periodic_heartbeat_task = main_tasks.create_task(run_periodic(30, write_heartbeat))
+    email_processing_task = main_tasks.create_task(direct_email_processing(emails_to_process_queue))
+    imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
 
-      if __debug__:
-        pass
+    if __debug__:
+      pass
 
-      RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
-      with RICH_CONSOLE.status("Application is running."):
-        await FATAL_EVENT
+    RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
+    # with RICH_CONSOLE.status("Application is running."):
+    await FATAL_EVENT
 
-      with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
-        email_processing_task.cancel()
+    with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
+      email_processing_task.cancel()
 
-        imap_idle_task.cancel()
+      imap_idle_task.cancel()
 
-        periodic_heartbeat_task.cancel()
+      periodic_heartbeat_task.cancel()
 
-    emails_to_process_queue.shutdown(immediate=True)
+  emails_to_process_queue.shutdown(immediate=True)
 
-    exit(1)
+  exit(1)
 
   raise RuntimeError("How did we get here? The main function should never exit normally.")
 
