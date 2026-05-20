@@ -1,3 +1,4 @@
+# heartrate
 if __name__ == "__main__":
   from sys import platform
 
@@ -15,8 +16,10 @@ else:
 
 
 from asyncio import create_task, sleep
+from asyncio.events import get_running_loop
 from asyncio.queues import Queue
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from logging import getLogger
 from threading import Thread
@@ -59,42 +62,65 @@ async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
 
 
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
-  RICH_CONSOLE.rule("[bold red]Booting...[/]", style="bold red")
-  # Write initial heartbeat on startup
-  write_heartbeat()
+  from heartrate import files, trace
 
-  emails_to_process_queue: Queue[MailMessage] = Queue()
+  trace(
+    port=9998,
+    host="127.0.0.1" if __debug__ else "0.0.0.0",
+    browser=__debug__,
+    daemon=True,
+  )
 
-  # async with TaskGroup() as main_tasks:
-  periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
-  email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
+  loop = get_running_loop()
 
-  email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue,))
-  email_monitoring_thread.start()
+  with ThreadPoolExecutor(
+    initializer=trace,
+    initargs=(
+      files.contains_regex(r"#\s*heartrate"),
+      9997,
+      "127.0.0.1" if __debug__ else "0.0.0.0",
+      __debug__,
+      True,
+    ),
+  ) as executor:
+    loop.set_default_executor(executor)
 
-  # imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
+    RICH_CONSOLE.rule("[bold red]Booting...[/]", style="bold red")
+    # Write initial heartbeat on startup
+    write_heartbeat()
 
-  if __debug__:
-    pass
+    emails_to_process_queue: Queue[MailMessage] = Queue()
 
-  RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
-  # with RICH_CONSOLE.status("Application is running."):
-  await FATAL_EVENT
+    # async with TaskGroup() as main_tasks:
+    periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
+    email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
 
-  # with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
-  email_monitoring_thread.join(60)
-  if email_monitoring_thread.is_alive():
-    logger.warning("Email monitoring thread did not shut down within timeout.")
+    email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue,))
+    email_monitoring_thread.start()
 
-  emails_to_process_queue.shutdown()  # Signal that no more emails will be added to the queue
+    # imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
 
-  email_processing_task.cancel()
+    if __debug__:
+      pass
 
-  periodic_heartbeat_task.cancel()
+    RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
+    # with RICH_CONSOLE.status("Application is running."):
+    await FATAL_EVENT
 
-  exit(1)
+    # with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
+    email_monitoring_thread.join(60)
+    if email_monitoring_thread.is_alive():
+      logger.warning("Email monitoring thread did not shut down within timeout.")
 
-  raise RuntimeError("How did we get here? The main function should never exit normally.")
+    emails_to_process_queue.shutdown()  # Signal that no more emails will be added to the queue
+
+    email_processing_task.cancel()
+
+    periodic_heartbeat_task.cancel()
+
+    exit(1)
+
+    raise RuntimeError("How did we get here? The main function should never exit normally.")
 
 
 if __name__ == "__main__":

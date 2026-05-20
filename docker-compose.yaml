@@ -6,7 +6,9 @@ services:
     container_name: imap-report-collector
     restart: no
     expose:
-      - "8080"
+      - "9999"
+      - "9998"
+      - "9997"
     healthcheck:
       test:
         - CMD-SHELL

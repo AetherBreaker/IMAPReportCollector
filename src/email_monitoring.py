@@ -1,3 +1,4 @@
+# heartrate
 if __name__ == "__main__":
   from sys import platform
 
@@ -35,6 +36,15 @@ RESPONSE_UID_PATTERN = compile(r"^\* (?P<uid>\d+) (?P<resp>[A-Z]+).*$")
 def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
   """Start the IMAP email monitoring. Runs in a separate thread"""
   # waiting for updates 60 sec, print unseen immediately if any update
+  from heartrate import trace
+
+  trace(
+    port=9999,
+    host="127.0.0.1" if __debug__ else "0.0.0.0",
+    browser=__debug__,
+    daemon=True,
+  )
+
   ssl_context = create_default_context()
   exists_but_unfound: set[int] = set()
 
