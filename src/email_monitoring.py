@@ -42,7 +42,8 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
     logger.info(f"Emails currently in processing queue: {queue.qsize()}")
     sleep(0)  # Yield control to allow the main thread to run
 
-    logger.info("Connecting to IMAP server to check for new emails...")
+    logger.info(f"Connecting to IMAP server {SETTINGS.watch_imap_server}:{SETTINGS.watch_imap_port}")
+    logger.info(f"  Using email: {SETTINGS.watch_email}")
     with MailBox(
       host=SETTINGS.watch_imap_server,
       port=SETTINGS.watch_imap_port,
