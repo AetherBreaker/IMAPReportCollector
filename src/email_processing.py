@@ -76,9 +76,9 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
 
         # check if the a directory with a name that matches the report name exists on the FTP server, if not create it
         logger.info(f"Querying FTP for {target_folder}")
-        dirs = [entry for entry in sftp_client.listdir(path=BASE_DIR.as_posix())]
+        dirs = [entry.filename for entry in sftp_client.listdir(path=BASE_DIR.as_posix())]
         logger.info(f"Query for {target_folder} complete")
-        if str(target_folder) not in dirs:
+        if str(target_folder.name) not in dirs:
           sftp_client.makedir(target_folder.as_posix())
           logger.info(f"Created new directory on FTP server: {target_folder}")
 
@@ -95,7 +95,9 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
           )
           logger.info(f"Attachment '{remote_path.name}' uploaded to '{remote_path.as_posix()}'")
 
-        logger.info(f"Successfully processed email '{email_data.subject}' and uploaded attachments to FTP server.")
+      logger.info(f"Successfully processed email '{email_data.subject}' and uploaded attachments to FTP server.")
+
+      queue.task_done()
 
     except ServerNotAvailableError as e:
       logger.error(f"Failed to process email due to FTP server issues: {e}")
