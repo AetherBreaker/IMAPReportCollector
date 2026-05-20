@@ -14,11 +14,12 @@ else:
   from logging_config import RICH_CONSOLE
 
 
-from asyncio import TaskGroup, sleep, to_thread
+from asyncio import create_task, sleep
 from asyncio.queues import Queue
 from collections.abc import Callable
 from datetime import datetime
 from logging import getLogger
+from threading import Thread
 from typing import NoReturn
 
 from email_monitoring import start_imap_email_monitoring
@@ -64,26 +65,32 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
 
   emails_to_process_queue: Queue[MailMessage] = Queue()
 
-  async with TaskGroup() as main_tasks:
-    periodic_heartbeat_task = main_tasks.create_task(run_periodic(30, write_heartbeat))
-    email_processing_task = main_tasks.create_task(direct_email_processing(emails_to_process_queue))
-    imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
+  # async with TaskGroup() as main_tasks:
+  periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
+  email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
 
-    if __debug__:
-      pass
+  email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue,))
+  email_monitoring_thread.start()
 
-    RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
-    # with RICH_CONSOLE.status("Application is running."):
-    await FATAL_EVENT
+  # imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
 
-    with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
-      email_processing_task.cancel()
+  if __debug__:
+    pass
 
-      imap_idle_task.cancel()
+  RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
+  # with RICH_CONSOLE.status("Application is running."):
+  await FATAL_EVENT
 
-      periodic_heartbeat_task.cancel()
+  # with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
+  email_monitoring_thread.join(60)
+  if email_monitoring_thread.is_alive():
+    logger.warning("Email monitoring thread did not shut down within timeout.")
 
-  emails_to_process_queue.shutdown(immediate=True)
+  emails_to_process_queue.shutdown()  # Signal that no more emails will be added to the queue
+
+  email_processing_task.cancel()
+
+  periodic_heartbeat_task.cancel()
 
   exit(1)
 
