@@ -16,6 +16,7 @@ from datetime import date
 from logging import getLogger
 from re import compile
 from ssl import create_default_context
+from time import sleep
 
 from environment_init_vars import FATAL_EVENT, SETTINGS
 from err_handling import handle_fatal_exc_sync
@@ -38,6 +39,9 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
   exists_but_unfound: set[int] = set()
 
   while True:
+    logger.info(f"Emails currently in processing queue: {queue.qsize()}")
+    sleep(0)  # Yield control to allow the main thread to run
+
     logger.info("Connecting to IMAP server to check for new emails...")
     with MailBox(
       host=SETTINGS.watch_imap_server,
@@ -78,13 +82,16 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
 
       if FATAL_EVENT.is_set():
         break
+
       if responses:
         logger.info(f"  IMAP IDLE response received: {responses}. Refreshing mailbox")
         mailbox.folder.set("Inbox")
+
         match = RESPONSE_UID_PATTERN.match(responses[0].decode())
         if match is None:
           logger.error(f"  Received IMAP response did not match expected pattern: {responses[0].decode()}.")
           continue
+
         logger.info(
           "  Attempting fetch for emails with the following criteria:"
           "    From: emails@mailing.goftx.com\n"
@@ -92,6 +99,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
           "    Text contains: 'report contents'\n"
           "    Does not have keyword: 'AutoMon_Seen'"
         )
+
         fetch_found = False
         for msg in mailbox.fetch(
           A(
@@ -106,13 +114,14 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
             flag_as_seen(msg, mailbox)
           logger.info(f"    New email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
           queue.put_nowait(msg)
+
         if not fetch_found:
-          logger.info(
-            "  No matching unseen emails found after EXISTS response. This may be due to timing issues. Will check again on next IDLE response\n"
-          )
-          exists_but_unfound.add(int(match.group("uid")) + 1)
+          logger.info("  No matching unseen emails found. Will check again on next IDLE response\n")
+          exists_but_unfound.add(int(match.group("uid")))
+
         else:
-          logger.info(f"  Finished processing IMAP IDLE response. Emails in processing queue: {queue.qsize()}\n")
+          logger.info("  Finished processing IMAP IDLE response.\n")
+
       else:
         logger.info(f"no updates in {SETTINGS.watch_polling_timeout_sec} sec\n")
 
