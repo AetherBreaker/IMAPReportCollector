@@ -18,8 +18,8 @@ if TYPE_CHECKING:
 
 RICH_CONSOLE: Console = None  # type: ignore
 
-PROJECT_NAME = "IMAPScheduledReportProcessor"
-LOGGING_BASE_NAME = "IMAPScheduledReportProcessor"
+PROJECT_NAME = "IMAPReportCollector"
+LOGGING_BASE_NAME = "IMAPReportCollector"
 
 
 DEFAULT_MAX_WIDTH = 36

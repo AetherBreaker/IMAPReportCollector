@@ -1,9 +1,9 @@
 services:
-  report-processor:
+  imap-report-collector:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: imap-scheduled-report-processor
+    container_name: imap-report-collector
     restart: no
     expose:
       - "8080"
