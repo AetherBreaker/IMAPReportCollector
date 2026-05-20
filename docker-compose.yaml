@@ -23,7 +23,7 @@ services:
     # Persist logs and queue backups
     volumes:
       - type: bind
-        source: /data/reports_processing_files
+        source: /data/imap_report_collector_files
         target: /app/persisted_data
 
     # Environment variables (customize as needed)
