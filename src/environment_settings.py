@@ -44,12 +44,12 @@ class Settings(BaseSettings):
 
   watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 60
 
-  @property
-  def sft_ftp_creds_file(self) -> Path:
-    if __debug__:
-      fp = CWD / "secrets" / "sft_ftp_creds.json"
-    else:
-      fp = self.persisted_dir_loc / "secrets" / "sft_ftp_creds.json"
+  def creds_file_reusable(self, err_msg: str, *expected_path_parts: str) -> Path:
+    fp = self.persisted_dir_loc.joinpath(*expected_path_parts)
     if not fp.exists() or not fp.is_file():
-      raise FileNotFoundError(f"SFTP/FTP credentials file not found at expected location: {fp}")
+      raise FileNotFoundError(f"{err_msg}: {fp}")
     return fp
+
+  @property
+  def sft_website_creds_file(self) -> Path:
+    return self.creds_file_reusable("SFT website creds file not found at expected location", "secrets", "sft_ftp_creds.json")

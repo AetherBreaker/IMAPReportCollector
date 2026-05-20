@@ -603,7 +603,7 @@ class FTPAdapter[HandlerType_T: AdaptedFTP | AdaptedSFTP]:
 
 class SFTSFTPClient(SFTPProtocol):
   policy = AutoAddPolicy()
-  creds = loads(SETTINGS.sft_ftp_creds_file.read_text())
+  creds = loads(SETTINGS.sft_website_creds_file.read_text())
   KIND = ProtocolEnum.SFTP
 
   def get_conn_handler(self) -> SFTPClient:
