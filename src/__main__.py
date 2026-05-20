@@ -7,7 +7,6 @@ if __name__ == "__main__":
   RICH_CONSOLE = Console(
     width=None if platform == "win32" else 175,
     log_time=platform == "win32",
-    force_interactive=False,
   )
 
   configure_logging(RICH_CONSOLE)
