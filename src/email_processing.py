@@ -16,8 +16,8 @@ from io import BytesIO
 from logging import getLogger
 from pathlib import PurePosixPath
 from re import Pattern, compile
-from typing import NoReturn
 
+from environment_init_vars import FATAL_EVENT
 from err_handling import handle_fatal_exc_async
 from ftp_adapter import AdaptedSFTP, FTPAdapter, ServerNotAvailableError, SFTSFTPClient
 from imap_tools import MailMessage
@@ -26,10 +26,13 @@ logger = getLogger(__name__)
 
 
 @handle_fatal_exc_async
-async def direct_email_processing(queue: Queue[MailMessage]) -> NoReturn:
+async def direct_email_processing(queue: Queue[MailMessage]):
   """Continuously check for new emails and process them."""
   async with TaskGroup() as subtasks:
     while True:
+      if FATAL_EVENT.is_set():
+        logger.error("Fatal event detected. Stopping email processing.")
+        break
       logger.info("Waiting for emails to be added to queue...")
       email_data = await queue.get()
       logger.info(f"Email with subject '{email_data.subject}' retrieved from queue for processing.")
