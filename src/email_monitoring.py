@@ -20,7 +20,7 @@ from time import sleep
 
 from environment_init_vars import FATAL_EVENT, SETTINGS
 from err_handling import handle_fatal_exc_sync
-from imap_tools import A, MailBox, MailMessage
+from imap_tools import A, MailBox, MailMessage, UidRange
 
 logger = getLogger(__name__)
 
@@ -57,6 +57,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
           fetch_found = False
           for msg in mailbox.fetch(
             A(
+              uid=UidRange(str(uid), "*"),
               from_="emails@mailing.goftx.com",
               date_gte=STATIC_DATE_FILTER,
               text="report contents",
