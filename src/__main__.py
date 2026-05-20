@@ -5,7 +5,7 @@ if __name__ == "__main__":
   from rich.console import Console
 
   RICH_CONSOLE = Console(
-    width=None if platform == "win32" else 175,
+    width=None if platform == "win32" else 165,
     log_time=platform == "win32",
   )
 
