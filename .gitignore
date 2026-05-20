@@ -226,3 +226,4 @@ attachments_dl/**
 *.json
 *.env
 persisted_data/
+PYCACHE/

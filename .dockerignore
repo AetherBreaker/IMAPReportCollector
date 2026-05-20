@@ -34,6 +34,7 @@ PYCACHE/
 
 
 # misc project files
+persisted_data/
 
 # CRITICAL: Exclude ALL secrets from being copied into the image
 secrets/
