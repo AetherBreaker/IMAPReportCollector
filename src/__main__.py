@@ -19,7 +19,6 @@ from asyncio.queues import Queue
 from collections.abc import Callable
 from datetime import datetime
 from logging import getLogger
-from pathlib import PosixPath, PurePosixPath
 from typing import NoReturn
 
 from email_monitoring import start_imap_email_monitoring
@@ -27,13 +26,13 @@ from email_processing import direct_email_processing
 from environment_init_vars import FATAL_EVENT
 from err_handling import handle_fatal_exc_async
 from imap_tools import MailMessage
-from logging_config import RICH_CONSOLE
+from logging_config import LOG_LOC_FOLDER, RICH_CONSOLE
 
 logger = getLogger(__name__)
 
 if not __debug__:
   # Heartbeat file for health checks
-  HEARTBEAT_FILE = PurePosixPath("/app/src/logs/heartbeat.txt") if __debug__ else PosixPath("/app/src/logs/heartbeat.txt")
+  HEARTBEAT_FILE = LOG_LOC_FOLDER / "heartbeat.txt"
 
   def write_heartbeat():
     """Write current timestamp to heartbeat file for health monitoring."""
