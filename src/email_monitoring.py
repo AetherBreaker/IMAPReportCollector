@@ -113,6 +113,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
           fetch_found = True
           if msg.uid is not None:
             flag_as_seen(msg, mailbox)
+            exists_but_unfound.discard(int(msg.uid))  # Remove from unfound list if it was there, no error if it wasn't
           logger.info(f"    New email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
           queue.put_nowait(msg)
 
