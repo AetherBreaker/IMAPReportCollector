@@ -66,7 +66,7 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   if SETTINGS.realtime_monitor:
     trace(
       files=files.all,
-      port=9998,
+      port=9999,
       host="127.0.0.1" if __debug__ else "0.0.0.0",
       browser=__debug__,
       daemon=True,
