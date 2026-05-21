@@ -9,9 +9,23 @@ dependencies = [
     "paramiko>=5.0.0",
     "pydantic==2.*",
     "pydantic-settings==2.*",
-    "rich==14.*",
+    "rich>=15.0.0",
+    "sft-ext",
     "tzdata>=2026.1",
     "uvloop>=0.22.1 ; sys_platform == 'linux'",
     "winloop>=0.6.0 ; sys_platform == 'win32'",
 ]
+
+[tool.uv]
+environments = [
+    "sys_platform == 'win32'",
+    "sys_platform == 'linux'",
+]
+
+[tool.uv.sources]
+sft-ext = [
+    { path = "D:\\SFT Software Projects\\sft_ext", marker = "sys_platform == 'win32'" },
+    { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'" }
+]
+
 
