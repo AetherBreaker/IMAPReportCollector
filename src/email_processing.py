@@ -3,7 +3,8 @@ if __name__ == "__main__":
 
   configure_logging()
 
-from asyncio import TaskGroup, to_thread
+import asyncio
+from asyncio import TaskGroup, get_running_loop, to_thread
 from asyncio.queues import Queue
 from ftplib import FTP, _SSLSocket  # type: ignore
 from io import BytesIO
@@ -53,11 +54,12 @@ class SFTFTPClient(FTP):
 @handle_fatal_exc_async
 async def direct_email_processing(queue: Queue[MailMessage]) -> NoReturn:
   """Continuously check for new emails and process them."""
+  loop = get_running_loop()
   async with TaskGroup() as subtasks:
     while True:
       email_data = await queue.get()
 
-      subtasks.create_task(to_thread(process_email, email_data=email_data, queue=queue))
+      subtasks.create_task(to_thread(process_email, email_data=email_data, queue=queue, loop=loop))
 
 
 # Regex pattern for matching email subjects
@@ -70,7 +72,7 @@ SUBJECT_PATTERN: Pattern = compile(
 )
 
 
-def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
+def process_email(email_data: MailMessage, queue: Queue[MailMessage], loop: asyncio.AbstractEventLoop) -> None:
   """Process a single email message."""
   # Placeholder for actual email processing logic
   logger.info(f"Processing email with subject: {email_data.subject}")
@@ -100,6 +102,5 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
 
     except ServerNotAvailableError as e:
       logger.error(f"Failed to process email due to FTP server issues: {e}")
-      # re-add the email to the queue for retry after some delay
-      # In a real implementation, you might want to implement an exponential backoff strategy here
-      queue.put_nowait(email_data)
+      # re-queue from this worker thread back onto the asyncio loop's queue safely
+      loop.call_soon_threadsafe(queue.put_nowait, email_data)

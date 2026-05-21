@@ -3,7 +3,7 @@ if __name__ == "__main__":
 
   configure_logging()
 
-from asyncio import TaskGroup, sleep, to_thread
+from asyncio import TaskGroup, get_running_loop, sleep, to_thread
 from asyncio.queues import Queue
 from collections.abc import Callable
 from datetime import datetime
@@ -59,7 +59,9 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
     async with TaskGroup() as main_tasks:
       periodic_heartbeat_task = main_tasks.create_task(run_periodic(30, write_heartbeat))
       email_processing_task = main_tasks.create_task(direct_email_processing(emails_to_process_queue))
-      imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
+      imap_idle_task = main_tasks.create_task(
+        to_thread(start_imap_email_monitoring, queue=emails_to_process_queue, loop=get_running_loop())
+      )
 
       if __debug__:
         pass
