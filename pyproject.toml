@@ -24,7 +24,7 @@ environments = [
 
 [tool.uv.sources]
 sft-ext = [
-    { path = "D:\\SFT Software Projects\\sft_ext", marker = "sys_platform == 'win32'" },
+    { path = "D:\\SFT Software Projects\\sft_ext", editable = true , marker = "sys_platform == 'win32'" },
     { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'" }
 ]
 

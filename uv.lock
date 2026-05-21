@@ -258,7 +258,7 @@ dependencies = [
     { name = "pydantic-settings", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "rich", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "sft-ext", version = "0.1.0", source = { git = "https://github.com/AetherBreaker/sft_ext#03288d63294dc0927f67ef99ed6a949507bc8a0c" }, marker = "sys_platform == 'linux'" },
-    { name = "sft-ext", version = "0.1.0", source = { directory = "D:/SFT Software Projects/sft_ext" }, marker = "sys_platform == 'win32'" },
+    { name = "sft-ext", version = "0.1.0", source = { editable = "D:/SFT Software Projects/sft_ext" }, marker = "sys_platform == 'win32'" },
     { name = "tzdata", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "uvloop", marker = "sys_platform == 'linux'" },
     { name = "winloop", marker = "sys_platform == 'win32'" },
@@ -275,7 +275,7 @@ requires-dist = [
     { name = "rich", specifier = ">=15.0.0" },
     { name = "sft-ext", marker = "sys_platform != 'linux' and sys_platform != 'win32'" },
     { name = "sft-ext", marker = "sys_platform == 'linux'", git = "https://github.com/AetherBreaker/sft_ext" },
-    { name = "sft-ext", marker = "sys_platform == 'win32'", directory = "D:/SFT Software Projects/sft_ext" },
+    { name = "sft-ext", marker = "sys_platform == 'win32'", editable = "D:/SFT Software Projects/sft_ext" },
     { name = "tzdata", specifier = ">=2026.1" },
     { name = "uvloop", marker = "sys_platform == 'linux'", specifier = ">=0.22.1" },
     { name = "winloop", marker = "sys_platform == 'win32'", specifier = ">=0.6.0" },
@@ -528,7 +528,7 @@ dependencies = [
 [[package]]
 name = "sft-ext"
 version = "0.1.0"
-source = { directory = "D:/SFT Software Projects/sft_ext" }
+source = { editable = "D:/SFT Software Projects/sft_ext" }
 resolution-markers = [
     "sys_platform == 'win32'",
 ]
