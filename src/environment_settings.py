@@ -44,6 +44,8 @@ class Settings(BaseSettings):
 
   watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 10
 
+  realtime_monitor: Annotated[bool, Field(alias="REALTIME_MONITOR")] = False
+
   def creds_file_reusable(self, err_msg: str, *expected_path_parts: str) -> Path:
     fp = self.persisted_dir_loc.joinpath(*expected_path_parts)
     if not fp.exists() or not fp.is_file():

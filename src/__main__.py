@@ -1,4 +1,3 @@
-# heartrate
 if __name__ == "__main__":
   from sys import platform
 
@@ -27,7 +26,7 @@ from typing import NoReturn
 
 from email_monitoring import start_imap_email_monitoring
 from email_processing import direct_email_processing
-from environment_init_vars import FATAL_EVENT
+from environment_init_vars import FATAL_EVENT, SETTINGS
 from err_handling import handle_fatal_exc_async
 from imap_tools import MailMessage
 from logging_config import LOG_LOC_FOLDER, RICH_CONSOLE
@@ -64,63 +63,68 @@ async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   from heartrate import files, trace
 
-  trace(
-    port=9998,
-    host="127.0.0.1" if __debug__ else "0.0.0.0",
-    browser=__debug__,
-    daemon=True,
-  )
+  if SETTINGS.realtime_monitor:
+    trace(
+      files=files.all,
+      port=9998,
+      host="127.0.0.1" if __debug__ else "0.0.0.0",
+      browser=__debug__,
+      daemon=True,
+    )
 
-  loop = get_running_loop()
+    loop = get_running_loop()
 
-  with ThreadPoolExecutor(
-    initializer=trace,
-    initargs=(
-      files.contains_regex(r"#\s*heartrate"),
-      9997,
-      "127.0.0.1" if __debug__ else "0.0.0.0",
-      __debug__,
-      True,
-    ),
-  ) as executor:
+    executor = ThreadPoolExecutor(
+      initializer=trace,
+      initargs=(
+        files.all,
+        9997,
+        "127.0.0.1" if __debug__ else "0.0.0.0",
+        __debug__,
+        True,
+      ),
+    )
     loop.set_default_executor(executor)
 
-    RICH_CONSOLE.rule("[bold red]Booting...[/]", style="bold red")
-    # Write initial heartbeat on startup
-    write_heartbeat()
+  RICH_CONSOLE.rule("[bold red]Booting...[/]", style="bold red")
+  # Write initial heartbeat on startup
+  write_heartbeat()
 
-    emails_to_process_queue: Queue[MailMessage] = Queue()
+  emails_to_process_queue: Queue[MailMessage] = Queue()
 
-    # async with TaskGroup() as main_tasks:
-    periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
-    email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
+  # async with TaskGroup() as main_tasks:
+  periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
+  email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
 
-    email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue,))
-    email_monitoring_thread.start()
+  email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue,))
+  email_monitoring_thread.start()
 
-    # imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
+  # imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
 
-    if __debug__:
-      pass
+  if __debug__:
+    pass
 
-    RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
-    # with RICH_CONSOLE.status("Application is running."):
-    await FATAL_EVENT
+  RICH_CONSOLE.rule("[bold red]Boot Done[/]", style="bold red")
+  # with RICH_CONSOLE.status("Application is running."):
+  await FATAL_EVENT
 
-    # with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
-    email_monitoring_thread.join(60)
-    if email_monitoring_thread.is_alive():
-      logger.warning("Email monitoring thread did not shut down within timeout.")
+  # with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
+  email_monitoring_thread.join(60)
+  if email_monitoring_thread.is_alive():
+    logger.warning("Email monitoring thread did not shut down within timeout.")
 
-    emails_to_process_queue.shutdown()  # Signal that no more emails will be added to the queue
+  emails_to_process_queue.shutdown()  # Signal that no more emails will be added to the queue
 
-    email_processing_task.cancel()
+  email_processing_task.cancel()
 
-    periodic_heartbeat_task.cancel()
+  periodic_heartbeat_task.cancel()
 
-    exit(1)
+  if SETTINGS.realtime_monitor:
+    executor.shutdown(wait=True)  # type: ignore
 
-    raise RuntimeError("How did we get here? The main function should never exit normally.")
+  exit(1)
+
+  raise RuntimeError("How did we get here? The main function should never exit normally.")
 
 
 if __name__ == "__main__":
