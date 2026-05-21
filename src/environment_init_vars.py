@@ -1,9 +1,7 @@
 import os
 from logging import getLogger
 from pathlib import Path
-from zoneinfo import ZoneInfo
 
-from aiologic import Event
 from environment_settings import Settings
 
 logger = getLogger(__name__)
@@ -17,8 +15,3 @@ SETTINGS = Settings()  # type: ignore
 
 # Folder paths
 CWD = Path.cwd()
-
-
-FATAL_EVENT = Event()
-
-TZ = ZoneInfo("US/Eastern")

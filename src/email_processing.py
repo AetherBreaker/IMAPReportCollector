@@ -18,10 +18,10 @@ from logging import getLogger
 from pathlib import PurePosixPath
 from re import Pattern, compile
 
-from environment_init_vars import FATAL_EVENT
-from err_handling import handle_fatal_exc_async
-from ftp_adapter import AdaptedSFTP, FTPAdapter, ServerNotAvailableError, SFTSFTPClient
+from ftp_configs import SFTSFTPClient
 from imap_tools import MailMessage
+from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
+from sft_ext.ftp.adapter import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
 
 logger = getLogger(__name__)
 

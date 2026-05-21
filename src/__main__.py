@@ -26,10 +26,10 @@ from typing import NoReturn
 
 from email_monitoring import start_imap_email_monitoring
 from email_processing import direct_email_processing
-from environment_init_vars import FATAL_EVENT, SETTINGS
-from err_handling import handle_fatal_exc_async
+from environment_init_vars import SETTINGS
 from imap_tools import MailMessage
 from logging_config import LOG_LOC_FOLDER, RICH_CONSOLE
+from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
 
 logger = getLogger(__name__)
 

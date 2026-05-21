@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Annotated
 
 from pydantic import Field
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import SettingsConfigDict
+from sft_ext.settings import BaseSettings
 
 logger = getLogger(__name__)
 
@@ -27,16 +28,6 @@ class Settings(BaseSettings):
     else SettingsConfigDict()
   )
 
-  persisted_dir_loc: Annotated[Path, Field(alias="PERSISTED_DIR_LOC")] = (
-    CWD / "persisted_data" if __debug__ else Path("/app/persisted_data")
-  )
-
-  alerts_smtp_server: Annotated[str, Field(alias="ALERTS_SMTP_SERVER")] = "smtppro.zoho.com"
-  alerts_smtp_port: Annotated[int, Field(alias="ALERTS_SMTP_PORT")] = 587
-  alerts_email: Annotated[str, Field(alias="ALERTS_EMAIL")] = "info@sweetfiretobacco.com"
-  alerts_email_pwd: Annotated[str, Field(alias="ALERTS_EMAIL_PWD")]
-  alerts_recipients: Annotated[set[str], Field(alias="ALERTS_RECIPIENTS")] = set()
-
   watch_imap_server: Annotated[str, Field(alias="WATCH_IMAP_SERVER")] = "imappro.zoho.com"
   watch_imap_port: Annotated[int, Field(alias="WATCH_IMAP_PORT")] = 993
   watch_email: Annotated[str, Field(alias="WATCH_EMAIL")] = "info@sweetfiretobacco.com"
@@ -45,12 +36,6 @@ class Settings(BaseSettings):
   watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 10
 
   realtime_monitor: Annotated[bool, Field(alias="REALTIME_MONITOR")] = False
-
-  def creds_file_reusable(self, err_msg: str, *expected_path_parts: str) -> Path:
-    fp = self.persisted_dir_loc.joinpath(*expected_path_parts)
-    if not fp.exists() or not fp.is_file():
-      raise FileNotFoundError(f"{err_msg}: {fp}")
-    return fp
 
   @property
   def sft_website_creds_file(self) -> Path:

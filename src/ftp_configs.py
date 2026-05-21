@@ -1,0 +1,50 @@
+from __future__ import annotations
+
+from json import loads
+from logging import getLogger
+from socket import gaierror
+
+from environment_init_vars import SETTINGS
+from paramiko import AutoAddPolicy, SFTPClient, SSHClient
+from sft_ext.ftp.adapter import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
+
+logger = getLogger(__name__)
+
+
+class SFTSFTPClient(SFTPProtocol):
+  policy = AutoAddPolicy()
+  creds = loads(SETTINGS.sft_website_creds_file.read_text())
+  KIND = ProtocolEnum.SFTP
+
+  def get_conn_handler(self) -> SFTPClient:
+    try:
+      self.ssh_client = SSHClient()
+      self.ssh_client.set_missing_host_key_policy(self.policy)
+
+      self.ssh_client.connect(
+        hostname=self.creds["HOSTNAME"],
+        port=self.creds.get("PORT", 22),
+        username=self.creds["USER"],
+        password=self.creds["PWD"],
+      )
+      self.handler = self.ssh_client.open_sftp()
+    except ConnectionRefusedError as e:
+      raise ServerNotAvailableError(
+        f"Could not connect to SFTP server at {self.creds['HOSTNAME']}:{self.creds.get('PORT', 22)}"
+        f"\n Server exists but is not running an SFTP service or is blocking the connection."
+      ) from e
+    except TimeoutError as e:
+      raise ServerNotAvailableError(
+        f"Connection to SFTP server at {self.creds['HOSTNAME']}:{self.creds.get('PORT', 22)} timed out."
+        f"\n Server may be offline or experiencing connectivity issues."
+      ) from e
+    except gaierror as e:
+      raise ServerNotAvailableError(
+        f"SFTP server hostname {self.creds['HOSTNAME']} could not be resolved.\n DNS has likely failed"
+      ) from e
+
+    return self.handler
+
+  def close_conn_handler(self) -> None:
+    self.handler.close()
+    self.ssh_client.close()

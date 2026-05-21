@@ -19,9 +19,9 @@ from re import compile
 from ssl import create_default_context
 from time import sleep
 
-from environment_init_vars import FATAL_EVENT, SETTINGS
-from err_handling import handle_fatal_exc_sync
+from environment_init_vars import SETTINGS
 from imap_tools import A, MailBox, MailMessage, UidRange
+from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_sync
 
 logger = getLogger(__name__)
 
