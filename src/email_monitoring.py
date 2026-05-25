@@ -47,7 +47,6 @@ def start_imap_email_monitoring(queue: Queue[MailMessage]) -> None:
 
     logger.info(f"Connecting to IMAP server {SETTINGS.watch_imap_server}:{SETTINGS.watch_imap_port}")
     logger.info(f"  Using email: {SETTINGS.watch_email}")
-    logger.info(f"  Using pwd: {SETTINGS.watch_email_pwd}")
     with MailBox(
       host=SETTINGS.watch_imap_server,
       port=SETTINGS.watch_imap_port,
