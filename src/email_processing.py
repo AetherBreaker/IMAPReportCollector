@@ -4,8 +4,7 @@ if __name__ == "__main__":
 
   init_logging()
 
-from asyncio import TaskGroup, to_thread
-from asyncio.queues import Queue
+from asyncio import AbstractEventLoop, Queue, TaskGroup, get_running_loop, to_thread
 from io import BytesIO
 from logging import getLogger
 from pathlib import PurePosixPath
@@ -23,6 +22,7 @@ logger = getLogger(__name__)
 @handle_fatal_exc_async
 async def direct_email_processing(queue: Queue[MailMessage]):
   """Continuously check for new emails and process them."""
+  loop = get_running_loop()
   async with TaskGroup() as subtasks:
     while True:
       if FATAL_EVENT.is_set():
@@ -31,7 +31,7 @@ async def direct_email_processing(queue: Queue[MailMessage]):
       logger.info("Waiting for emails to be added to queue...")
       email_data = await queue.get()
       logger.info(f"Email with subject '{email_data.subject}' retrieved from queue for processing.")
-      subtasks.create_task(to_thread(process_email, email_data=email_data, queue=queue))
+      subtasks.create_task(to_thread(process_email, email_data=email_data, queue=queue, loop=loop))
 
 
 # Regex pattern for matching email subjects
@@ -47,7 +47,7 @@ SWEETFIRE_SFTP: FTPAdapter[AdaptedSFTP] = FTPAdapter(SFTSFTPClient, container_cl
 BASE_DIR = PurePosixPath("/upload")
 
 
-def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
+def process_email(email_data: MailMessage, queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
   # sourcery skip: extract-method
   """Process a single email message."""
   # Placeholder for actual email processing logic
@@ -61,7 +61,7 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
     logger.info("Testing FTP connection to server...")
     if not SWEETFIRE_SFTP.test_connection():
       logger.error("FTP server is not available. Re-queuing email for later processing.")
-      queue.put_nowait(email_data)
+      loop.call_soon_threadsafe(queue.put_nowait, email_data)
       return
 
     try:
@@ -92,13 +92,13 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage]) -> None:
 
       logger.info(f"Successfully processed email '{email_data.subject}' and uploaded attachments to FTP server.")
 
-      queue.task_done()
+      loop.call_soon_threadsafe(queue.task_done)
 
     except ServerNotAvailableError as e:
       logger.error(f"Failed to process email due to FTP server issues: {e}")
       # re-add the email to the queue for retry after some delay
       # In a real implementation, you might want to implement an exponential backoff strategy here
-      queue.put_nowait(email_data)
+      loop.call_soon_threadsafe(queue.put_nowait, email_data)
 
   else:
     logger.warning(f"Email subject '{email_data.subject}' did not match expected pattern. Skipping")
