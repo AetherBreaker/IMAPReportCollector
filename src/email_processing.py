@@ -1,15 +1,8 @@
 # heartrate
 if __name__ == "__main__":
-  from sys import platform
+  from sft_ext.logging_ext.init_logging import init_logging
 
-  from logging_config import configure_logging
-  from rich.console import Console
-
-  RICH_CONSOLE = Console(width=None if platform == "win32" else 175, log_time=platform == "win32")
-
-  configure_logging(RICH_CONSOLE)
-else:
-  from logging_config import RICH_CONSOLE
+  init_logging()
 
 from asyncio import TaskGroup, to_thread
 from asyncio.queues import Queue
@@ -18,6 +11,7 @@ from logging import getLogger
 from pathlib import PurePosixPath
 from re import Pattern, compile
 
+from environment_init_vars import SETTINGS
 from ftp_configs import SFTSFTPClient
 from imap_tools import MailMessage
 from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
@@ -49,7 +43,7 @@ SUBJECT_PATTERN: Pattern = compile(
   r"\d{1,2}, \d{4} \d{1,2}:\d{2} (AM|PM))$"
 )
 
-SWEETFIRE_SFTP: FTPAdapter[AdaptedSFTP] = FTPAdapter(SFTSFTPClient, container_cls="")
+SWEETFIRE_SFTP: FTPAdapter[AdaptedSFTP] = FTPAdapter(SFTSFTPClient, container_cls="", tzinfo=SETTINGS.tz)
 BASE_DIR = PurePosixPath("/upload")
 
 

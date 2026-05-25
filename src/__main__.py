@@ -1,17 +1,21 @@
 if __name__ == "__main__":
   from sys import platform
 
-  from logging_config import configure_logging
   from rich.console import Console
+  from sft_ext.logging_ext.init_logging import init_logging
 
   RICH_CONSOLE = Console(
     width=None if platform == "win32" else 165,
     log_time=platform == "win32",
   )
+  PROJECT_NAME = "IMAPReportCollector"
+  LOGGING_TYPE = "daily"
 
-  configure_logging(RICH_CONSOLE)
+  init_logging()
 else:
-  from logging_config import RICH_CONSOLE
+  from rich import get_console
+
+  RICH_CONSOLE = get_console()
 
 
 from asyncio import create_task, sleep
@@ -28,14 +32,13 @@ from email_monitoring import start_imap_email_monitoring
 from email_processing import direct_email_processing
 from environment_init_vars import SETTINGS
 from imap_tools import MailMessage
-from logging_config import LOG_LOC_FOLDER, RICH_CONSOLE
 from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
 
 logger = getLogger(__name__)
 
 if not __debug__:
   # Heartbeat file for health checks
-  HEARTBEAT_FILE = LOG_LOC_FOLDER / "heartbeat.txt"
+  HEARTBEAT_FILE = SETTINGS.log_loc_folder / "heartbeat.txt"
 
   def write_heartbeat():
     """Write current timestamp to heartbeat file for health monitoring."""

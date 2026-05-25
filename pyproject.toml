@@ -10,7 +10,7 @@ dependencies = [
     "pydantic==2.*",
     "pydantic-settings==2.*",
     "rich>=15.0.0",
-    "sft-ext",
+    "sft-ext==0.2.2",
     "tzdata>=2026.1",
     "uvloop>=0.22.1 ; sys_platform == 'linux'",
     "winloop>=0.6.0 ; sys_platform == 'win32'",
