@@ -2,7 +2,7 @@ if __name__ == "__main__":
   from sys import platform
 
   from rich.console import Console
-  from sft_ext.logging_ext.init_logging import init_logging
+  from sft_ext.logging.init_logging import init_logging
 
   RICH_CONSOLE = Console(
     width=None if platform == "win32" else 165,
