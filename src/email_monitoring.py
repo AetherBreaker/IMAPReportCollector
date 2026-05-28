@@ -29,9 +29,9 @@ RESPONSE_UID_PATTERN = compile(r"^\* (?P<uid>\d+) (?P<resp>[A-Z]+).*$")
 def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
   """Start the IMAP email monitoring. Runs in a separate thread"""
   # waiting for updates 60 sec, print unseen immediately if any update
-  from heartrate import trace
-
   if SETTINGS.realtime_monitor:
+    from heartrate import trace
+
     trace(
       port=9998,
       host="127.0.0.1" if __debug__ else "0.0.0.0",

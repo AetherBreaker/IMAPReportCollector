@@ -62,9 +62,10 @@ async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
 
 
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
-  from heartrate import files, trace
 
   if SETTINGS.realtime_monitor:
+    from heartrate import files, trace
+
     trace(
       files=files.all,
       port=9999,
