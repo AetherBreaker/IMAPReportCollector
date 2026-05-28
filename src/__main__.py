@@ -109,6 +109,7 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   await FATAL_EVENT
 
   # with RICH_CONSOLE.status("[bold red]Shutting down...[/]", spinner="dots"):
+  RICH_CONSOLE.rule("[bold red]Shutting down...[/]", style="bold red")
   email_monitoring_thread.join(60)
   if email_monitoring_thread.is_alive():
     logger.warning("Email monitoring thread did not shut down within timeout.")
