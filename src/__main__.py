@@ -98,7 +98,7 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
   email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
 
-  email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue, get_running_loop()))
+  email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue, get_running_loop()), daemon=True)
   email_monitoring_thread.start()
 
   # imap_idle_task = main_tasks.create_task(to_thread(start_imap_email_monitoring, queue=emails_to_process_queue))
