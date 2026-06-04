@@ -2,12 +2,12 @@ version = 1
 revision = 3
 requires-python = ">=3.14"
 resolution-markers = [
-    "sys_platform == 'win32'",
     "sys_platform == 'linux'",
+    "sys_platform == 'win32'",
 ]
 supported-markers = [
-    "sys_platform == 'win32'",
     "sys_platform == 'linux'",
+    "sys_platform == 'win32'",
 ]
 
 [[package]]
@@ -257,8 +257,8 @@ dependencies = [
     { name = "pydantic", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "pydantic-settings", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "rich", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
-    { name = "sft-ext", version = "0.4.0", source = { git = "https://github.com/AetherBreaker/sft_ext?tag=v0.4.0#3abe280a3086bedf416b145fa72473f8df3403b0" }, extra = ["sftp"], marker = "sys_platform == 'linux'" },
-    { name = "sft-ext", version = "0.4.0", source = { editable = "D:/SFT Software Projects/sft_ext" }, extra = ["sftp"], marker = "sys_platform == 'win32'" },
+    { name = "sft-ext", version = "0.5.1", source = { git = "https://github.com/AetherBreaker/sft_ext?tag=v0.5.1#6304a26c1fc161e2b449fe1bc63a5421f6c62c6f" }, extra = ["sftp"], marker = "sys_platform == 'linux'" },
+    { name = "sft-ext", version = "0.5.1", source = { editable = "D:/SFT Software Projects/sft_ext" }, extra = ["sftp"], marker = "sys_platform == 'win32'" },
     { name = "tzdata", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "uvloop", marker = "sys_platform == 'linux'" },
     { name = "winloop", marker = "sys_platform == 'win32'" },
@@ -273,8 +273,8 @@ requires-dist = [
     { name = "pydantic", specifier = "==2.*" },
     { name = "pydantic-settings", specifier = "==2.*" },
     { name = "rich", specifier = ">=15.0.0" },
-    { name = "sft-ext", extras = ["sftp"], marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = "==0.4.0" },
-    { name = "sft-ext", extras = ["sftp"], marker = "sys_platform == 'linux'", git = "https://github.com/AetherBreaker/sft_ext?tag=v0.4.0" },
+    { name = "sft-ext", extras = ["sftp"], marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = "==0.5.1" },
+    { name = "sft-ext", extras = ["sftp"], marker = "sys_platform == 'linux'", git = "https://github.com/AetherBreaker/sft_ext?tag=v0.5.1" },
     { name = "sft-ext", extras = ["sftp"], marker = "sys_platform == 'win32'", editable = "D:/SFT Software Projects/sft_ext" },
     { name = "tzdata", specifier = ">=2026.1" },
     { name = "uvloop", marker = "sys_platform == 'linux'", specifier = ">=0.22.1" },
@@ -514,8 +514,8 @@ wheels = [
 
 [[package]]
 name = "sft-ext"
-version = "0.4.0"
-source = { git = "https://github.com/AetherBreaker/sft_ext?tag=v0.4.0#3abe280a3086bedf416b145fa72473f8df3403b0" }
+version = "0.5.1"
+source = { git = "https://github.com/AetherBreaker/sft_ext?tag=v0.5.1#6304a26c1fc161e2b449fe1bc63a5421f6c62c6f" }
 resolution-markers = [
     "sys_platform == 'linux'",
 ]
@@ -532,7 +532,7 @@ sftp = [
 
 [[package]]
 name = "sft-ext"
-version = "0.4.0"
+version = "0.5.1"
 source = { editable = "D:/SFT Software Projects/sft_ext" }
 resolution-markers = [
     "sys_platform == 'win32'",
@@ -560,7 +560,7 @@ requires-dist = [
     { name = "uvloop", marker = "sys_platform == 'linux' and extra == 'async'", specifier = ">=0.22.1" },
     { name = "winloop", marker = "sys_platform == 'win32' and extra == 'async'", specifier = ">=0.6.0" },
 ]
-provides-extras = ["async", "sftp", "dateutil"]
+provides-extras = ["async", "dateutil", "sftp"]
 
 [package.metadata.requires-dev]
 dev = [

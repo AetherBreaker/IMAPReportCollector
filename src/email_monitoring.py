@@ -9,7 +9,7 @@ from asyncio.queues import Queue
 from datetime import date
 from logging import getLogger
 from re import compile
-from ssl import create_default_context
+from ssl import create_default_context, socket_error
 from time import sleep
 
 from environment_init_vars import SETTINGS
@@ -50,83 +50,89 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
 
     logger.info(f"Connecting to IMAP server {SETTINGS.watch_imap_server}:{SETTINGS.watch_imap_port}")
     logger.info(f"  Using email: {SETTINGS.watch_email}")
-    with MailBox(
-      host=SETTINGS.watch_imap_server,
-      port=SETTINGS.watch_imap_port,
-      ssl_context=ssl_context,
-    ).login(SETTINGS.watch_email, SETTINGS.watch_email_pwd, "Inbox") as mailbox:
-      # Attempting fetch of unfound emails from previous EXISTS responses before polling for new ones
-      mailbox.folder.set("Inbox")
-      logger.info("Attempting to fetch previously unfound emails")
-      for msg in mailbox.fetch(
-        A(
-          # uid=UidRange("3638", "*"),
-          from_="emails@mailing.goftx.com",
-          date_gte=STATIC_DATE_FILTER,
-          text="report contents",
-          no_keyword="AutoMon_Seen",
+    try:
+      with MailBox(
+        host=SETTINGS.watch_imap_server,
+        port=SETTINGS.watch_imap_port,
+        ssl_context=ssl_context,
+      ).login(SETTINGS.watch_email, SETTINGS.watch_email_pwd, "Inbox") as mailbox:
+        # Attempting fetch of unfound emails from previous EXISTS responses before polling for new ones
+        mailbox.folder.set("Inbox")
+        logger.info("Attempting to fetch previously unfound emails")
+        for msg in mailbox.fetch(
+          A(
+            # uid=UidRange("3638", "*"),
+            from_="emails@mailing.goftx.com",
+            date_gte=STATIC_DATE_FILTER,
+            text="report contents",
+            no_keyword="AutoMon_Seen",
+          )
+        ):
+          logger.info(f"  Previously unfound email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
+          loop.call_soon_threadsafe(queue.put_nowait, msg)
+          if msg.uid is not None:
+            logger.info(f"  Email with UID {msg.uid} found and added to queue.")
+
+        logger.info("Entering IMAP IDLE mode to wait for new emails...")
+        mailbox.client
+        with mailbox.idle as idle:
+          logger.info("Polling for new emails...")
+          responses = idle.poll(SETTINGS.watch_polling_timeout_sec)
+
+        if FATAL_EVENT.is_set():
+          break
+
+        if not responses:
+          logger.info(f"no updates in {SETTINGS.watch_polling_timeout_sec} sec\n")
+          continue
+
+        logger.info(f"  IMAP IDLE response received: {responses}. Refreshing mailbox")
+        mailbox.folder.set("Inbox")
+
+        match = RESPONSE_UID_PATTERN.match(responses[0].decode())
+        if match is None:
+          logger.error(f"  Received IMAP response did not match expected pattern: {responses[0].decode()}.")
+          continue
+
+        logger.info(
+          "  Attempting fetch for emails with the following criteria:"
+          "    From: emails@mailing.goftx.com\n"
+          f"    Date >= {STATIC_DATE_FILTER}\n"
+          "    Text contains: 'report contents'\n"
+          "    Does not have keyword: 'AutoMon_Seen'"
         )
-      ):
-        logger.info(f"  Previously unfound email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
-        loop.call_soon_threadsafe(queue.put_nowait, msg)
-        if msg.uid is not None:
-          logger.info(f"  Email with UID {msg.uid} found and added to queue.")
 
-      logger.info("Entering IMAP IDLE mode to wait for new emails...")
-      mailbox.client
-      with mailbox.idle as idle:
-        logger.info("Polling for new emails...")
-        responses = idle.poll(SETTINGS.watch_polling_timeout_sec)
+        # fetch_found = False
+        for msg in mailbox.fetch(
+          A(
+            from_="emails@mailing.goftx.com",
+            date_gte=STATIC_DATE_FILTER,
+            text="report contents",
+            no_keyword="AutoMon_Seen",
+          ),
+        ):
+          # fetch_found = True
+          logger.info(f"    New email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
+          loop.call_soon_threadsafe(queue.put_nowait, msg)
+          if msg.uid is not None:
+            flag_as_seen(msg, mailbox)
+            # exists_but_unfound.discard(int(msg.uid))  # Remove from unfound list if it was there, no error if it wasn't
 
-      if FATAL_EVENT.is_set():
-        break
+        # if not fetch_found:
+        #   logger.info("  No matching unseen emails found. Will check again on next IDLE response\n")
+        #   exists_but_unfound.add(int(match.group("uid")))
 
-      if not responses:
-        logger.info(f"no updates in {SETTINGS.watch_polling_timeout_sec} sec\n")
-        continue
-
-      logger.info(f"  IMAP IDLE response received: {responses}. Refreshing mailbox")
-      mailbox.folder.set("Inbox")
-
-      match = RESPONSE_UID_PATTERN.match(responses[0].decode())
-      if match is None:
-        logger.error(f"  Received IMAP response did not match expected pattern: {responses[0].decode()}.")
-        continue
-
-      logger.info(
-        "  Attempting fetch for emails with the following criteria:"
-        "    From: emails@mailing.goftx.com\n"
-        f"    Date >= {STATIC_DATE_FILTER}\n"
-        "    Text contains: 'report contents'\n"
-        "    Does not have keyword: 'AutoMon_Seen'"
-      )
-
-      # fetch_found = False
-      for msg in mailbox.fetch(
-        A(
-          from_="emails@mailing.goftx.com",
-          date_gte=STATIC_DATE_FILTER,
-          text="report contents",
-          no_keyword="AutoMon_Seen",
-        ),
-      ):
-        # fetch_found = True
-        logger.info(f"    New email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
-        loop.call_soon_threadsafe(queue.put_nowait, msg)
-        if msg.uid is not None:
-          flag_as_seen(msg, mailbox)
-          # exists_but_unfound.discard(int(msg.uid))  # Remove from unfound list if it was there, no error if it wasn't
-
-      # if not fetch_found:
-      #   logger.info("  No matching unseen emails found. Will check again on next IDLE response\n")
-      #   exists_but_unfound.add(int(match.group("uid")))
-
-      logger.info("  Finished processing IMAP IDLE response.\n")
+        logger.info("  Finished processing IMAP IDLE response.\n")
+    except socket_error as e:
+      if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:
+        # reraise otherwise
+        raise e
+      logger.warning(f"Socket error occurred (likely due to server closing connection): {e}. Will attempt to reconnect.")
 
 
 def flag_as_seen(msg: MailMessage, mailbox: MailBox):
   assert msg.uid is not None, "This is impossible."
   logger.info(f"    Flagging {msg.uid} as seen")
-  mailbox.flag(msg.uid, "AutoMon_Seen", True)
+  mailbox.flag(msg.uid, "AutoMon_Seen", value=True)
   # mailbox.flag(msg.uid, MailMessageFlags.SEEN, True)
   logger.info(f"    {msg.uid} flagged as seen")
