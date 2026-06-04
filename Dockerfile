@@ -41,10 +41,6 @@ ENV PYTHONOPTIMIZE=1
 # Copy the virtual environment from the builder stage
 COPY --from=builder /app/.venv /app/.venv
 
-# Create directories for runtime data with proper permissions
-RUN mkdir -p /app/src/logs \
-  && chown -R nonroot:nonroot /app/src/logs
-
 # Copy the source code into the container.
 COPY --chown=nonroot:nonroot ./src ./src
 
