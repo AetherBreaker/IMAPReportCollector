@@ -1,20 +1,27 @@
 # heartrate
 if __name__ == "__main__":
+  # First party imports
   from sft_ext.logging.init_logging import init_logging
 
   init_logging()
 
+# Standard library imports
 from asyncio import AbstractEventLoop, Queue, TaskGroup, get_running_loop, to_thread
 from io import BytesIO
 from logging import getLogger
 from pathlib import PurePosixPath
 from re import Pattern, compile
+from typing import TYPE_CHECKING
 
+# First party imports
 from environment_init_vars import SETTINGS
 from ftp_configs import SFTSFTPClient
-from imap_tools import MailMessage
 from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
 from sft_ext.ftp.adapter import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
+
+if TYPE_CHECKING:
+  # Third party imports
+  from imap_tools import MailMessage
 
 logger = getLogger(__name__)
 

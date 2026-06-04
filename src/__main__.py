@@ -1,7 +1,11 @@
 if __name__ == "__main__":
+  # Standard library imports
   from sys import platform
 
+  # Third party imports
   from rich.console import Console
+
+  # First party imports
   from sft_ext.logging.init_logging import init_logging
 
   RICH_CONSOLE = Console(
@@ -13,24 +17,32 @@ if __name__ == "__main__":
 
   init_logging()
 else:
+  # Third party imports
   from rich import get_console
 
   RICH_CONSOLE = get_console()
 
-
+# Standard library imports
+import sys
 from asyncio import Queue, create_task, get_running_loop, sleep
-from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from logging import getLogger
 from threading import Thread
-from typing import NoReturn
+from typing import TYPE_CHECKING, NoReturn
 
+# First party imports
 from email_monitoring import start_imap_email_monitoring
 from email_processing import direct_email_processing
 from environment_init_vars import SETTINGS
-from imap_tools import MailMessage
 from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
+
+if TYPE_CHECKING:
+  # Standard library imports
+  from collections.abc import Callable
+
+  # Third party imports
+  from imap_tools import MailMessage
 
 logger = getLogger(__name__)
 
@@ -41,7 +53,7 @@ if not __debug__:
   def write_heartbeat():
     """Write current timestamp to heartbeat file for health monitoring."""
     try:
-      HEARTBEAT_FILE.write_text(datetime.now().isoformat())  # type: ignore
+      HEARTBEAT_FILE.write_text(datetime.now(SETTINGS.tz).isoformat())  # type: ignore
     except Exception as e:
       logger.error(f"Failed to write heartbeat: {e}")
 else:
@@ -64,6 +76,7 @@ async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
 
   if SETTINGS.realtime_monitor:
+    # Third party imports
     from heartrate import files, trace
 
     trace(
@@ -123,17 +136,20 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   if SETTINGS.realtime_monitor:
     executor.shutdown(wait=True)  # type: ignore
 
-  exit(1)
+  sys.exit(1)
 
   raise RuntimeError("How did we get here? The main function should never exit normally.")
 
 
 if __name__ == "__main__":
+  # Standard library imports
   from sys import platform
 
   if platform in ("win32", "cygwin", "cli"):
+    # Third party imports
     from winloop import run
   else:
     # if we're on apple or linux do this instead
+    # Third party imports
     from uvloop import run  # type: ignore
   run(main())

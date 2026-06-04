@@ -1,11 +1,15 @@
+# Standard library imports
 import sys
 from logging import getLogger
 from os import environ
 from pathlib import Path
 from typing import Annotated
 
+# Third party imports
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
+
+# First party imports
 from sft_ext.settings import BaseSettings
 
 logger = getLogger(__name__)

@@ -1,20 +1,29 @@
 # heartrate
 if __name__ == "__main__":
+  # First party imports
   from sft_ext.logging.init_logging import init_logging
 
   init_logging()
 
-from asyncio import AbstractEventLoop
-from asyncio.queues import Queue
+# Standard library imports
 from datetime import date
 from logging import getLogger
 from re import compile
 from ssl import create_default_context, socket_error
 from time import sleep
+from typing import TYPE_CHECKING
 
-from environment_init_vars import SETTINGS
+# Third party imports
 from imap_tools import A, MailBox, MailMessage
+
+# First party imports
+from environment_init_vars import SETTINGS
 from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_sync
+
+if TYPE_CHECKING:
+  # Standard library imports
+  from asyncio import AbstractEventLoop
+  from asyncio.queues import Queue
 
 # from imap_tools import UidRange
 
@@ -28,10 +37,11 @@ RESPONSE_UID_PATTERN = compile(r"^\* (?P<uid>\d+) (?P<resp>[A-Z]+).*$")
 
 
 @handle_fatal_exc_sync
-def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
+def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:  # noqa: C901
   """Start the IMAP email monitoring. Runs in a separate thread"""
   # waiting for updates 60 sec, print unseen immediately if any update
   if SETTINGS.realtime_monitor:
+    # Third party imports
     from heartrate import trace
 
     trace(
@@ -74,7 +84,6 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
             logger.info(f"  Email with UID {msg.uid} found and added to queue.")
 
         logger.info("Entering IMAP IDLE mode to wait for new emails...")
-        mailbox.client
         with mailbox.idle as idle:
           logger.info("Polling for new emails...")
           responses = idle.poll(SETTINGS.watch_polling_timeout_sec)

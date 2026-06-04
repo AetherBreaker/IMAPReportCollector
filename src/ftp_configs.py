@@ -1,11 +1,16 @@
+# Future imports
 from __future__ import annotations
 
+# Standard library imports
 from json import loads
 from logging import getLogger
 from socket import gaierror
 
-from environment_init_vars import SETTINGS
+# Third party imports
 from paramiko import AutoAddPolicy, SFTPClient, SSHClient
+
+# First party imports
+from environment_init_vars import SETTINGS
 from sft_ext.ftp.adapter import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
 
 logger = getLogger(__name__)
