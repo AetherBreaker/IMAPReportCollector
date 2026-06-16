@@ -7,6 +7,7 @@ if __name__ == "__main__":
 
 # Standard library imports
 from datetime import date
+from imaplib import IMAP4
 from logging import getLogger
 from re import compile
 from ssl import create_default_context, socket_error
@@ -132,7 +133,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
         #   exists_but_unfound.add(int(match.group("uid")))
 
         logger.info("  Finished processing IMAP IDLE response.\n")
-    except socket_error as e:
+    except (socket_error, IMAP4.abort) as e:
       if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:
         # reraise otherwise
         raise e
