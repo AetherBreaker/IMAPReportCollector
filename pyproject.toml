@@ -7,7 +7,7 @@
     "pydantic-settings==2.*",
     "pydantic==2.*",
     "rich>=15.0.0",
-    "sft-ext[sftp]==0.5.1",
+    "sft-ext[sftp]==0.7.0",
     "tzdata>=2026.1",
     "uvloop>=0.22.1 ; sys_platform == 'linux'",
     "winloop>=0.6.0 ; sys_platform == 'win32'",
@@ -24,7 +24,7 @@
 
   [tool.uv.sources]
     sft-ext = [
-      { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'", tag = "v0.5.1" },
+      { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'", tag = "v0.7.0" },
       { path = "D:\\SFT Software Projects\\sft_ext", editable = true, marker = "sys_platform == 'win32'" },
     ]
 
