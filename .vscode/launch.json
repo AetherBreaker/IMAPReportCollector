@@ -14,7 +14,7 @@
             "envFile": "${workspaceFolder}/.env",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}\\src",
-                "PYTHONPYCACHEPREFIX": "${workspaceFolder}\\PYCACHE",
+                "PYTHONPYCACHEPREFIX": "${workspaceFolder}\\__pycache__",
                 "PYTHONUNBUFFERED": "1",
                 "SFT_FTP_CREDS_FILE": "${workspaceFolder}\\secrets\\sft_ftp_creds.json"
             }
@@ -30,7 +30,7 @@
             "envFile": "${workspaceFolder}/.env",
             "env": {
                 "PYTHONPATH": "${workspaceFolder}\\src",
-                "PYTHONPYCACHEPREFIX": "${workspaceFolder}\\PYCACHE",
+                "PYTHONPYCACHEPREFIX": "${workspaceFolder}\\__pycache__",
                 "PYTHONUNBUFFERED": "1",
                 "SFT_FTP_CREDS_FILE": "${workspaceFolder}\\secrets\\sft_ftp_creds.json"
             }
