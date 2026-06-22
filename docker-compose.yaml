@@ -30,7 +30,6 @@ services:
 
     # Environment variables (customize as needed)
     environment:
-      # Override secret file paths to use Docker secrets location
       # Email to Watch
       - WATCH_EMAIL=info@sweetfiretobacco.com
       - WATCH_EMAIL_PWD=${WATCH_EMAIL_PWD:?}
