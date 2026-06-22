@@ -1,42 +1,40 @@
 [project]
-  dependencies = [
+  name            = "imapreportcollector"
+  version         = "0.1.5"
+  requires-python = ">=3.14"
+  dependencies    = [
     "aiologic==0.16.*",
     "heartrate>=0.2.2",
     "imap-tools>=1.11.1",
     "paramiko>=5.0.0",
-    "pydantic-settings==2.*",
     "pydantic==2.*",
+    "pydantic-settings==2.*",
     "rich>=15.0.0",
-    "sft-ext[sftp]==0.7.3",
+    "sft-ext[sftp]==0.7.4",
     "tzdata>=2026.1",
     "uvloop>=0.22.1 ; sys_platform == 'linux'",
     "winloop>=0.6.0 ; sys_platform == 'win32'",
   ]
-  name = "imapreportcollector"
-  requires-python = ">=3.14"
-  version = "0.1.4"
 
-[tool.uv]
-  environments = [
-    "sys_platform == 'linux'",
-    "sys_platform == 'win32'",
-  ]
+[tool.poe.tasks.bump]
+  help        = "Bump version, commit, tag, and push. Usage: poe bump [major|minor|patch]"
+  interpreter = "bash"
+  shell       = """
+    set -e
+    NEW_VERSION=$(uv version --bump "${bump_type}" | awk '{print $NF}')
+    git add pyproject.toml uv.lock
+    git commit -m "Bump version to ${NEW_VERSION}"
+    git tag -a "v${NEW_VERSION}" -m "Version ${NEW_VERSION}"
+    git push --follow-tags
+  """
 
-  [tool.uv.sources]
-    sft-ext = [
-      { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'", tag = "v0.7.3" },
-      { path = "D:\\SFT Software Projects\\sft_ext", editable = true, marker = "sys_platform == 'win32'" },
-    ]
-
-[tool.ruff]
-  extend = "../pyproject.toml"
-
-  src = [
-    "./src",
-  ]
+  [[tool.poe.tasks.bump.args]]
+    name       = "bump_type"
+    positional = true
+    help       = "Version component to bump: major, minor, or patch"
 
 [tool.pyright]
-  extraPaths = [
+  extraPaths       = [
     "src",
   ]
   typeCheckingMode = "standard"
@@ -46,3 +44,22 @@
       "src",
     ] },
   ]
+
+[tool.ruff]
+  extend = "../pyproject.toml"
+
+  src = [
+    "./src",
+  ]
+
+[tool.uv]
+  environments = [
+    "sys_platform == 'linux'",
+    "sys_platform == 'win32'",
+  ]
+
+  [tool.uv.sources]
+    sft-ext = [
+      { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'", tag = "v0.7.4" },
+      { path = "D:\\SFT Software Projects\\sft_ext", editable = true, marker = "sys_platform == 'win32'" },
+    ]
