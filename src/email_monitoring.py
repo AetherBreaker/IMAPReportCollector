@@ -1,7 +1,7 @@
 # heartrate
 if __name__ == "__main__":
   # First party imports
-  from sft_ext.logging.init_logging import init_logging
+  from sft_ext.logging.init import init_logging
 
   init_logging()
 
@@ -19,7 +19,7 @@ from imap_tools import A, MailBox, MailMessage
 
 # First party imports
 from environment_init_vars import SETTINGS
-from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_sync
+from sft_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 
 if TYPE_CHECKING:
   # Standard library imports

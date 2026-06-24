@@ -1,7 +1,7 @@
 # heartrate
 if __name__ == "__main__":
   # First party imports
-  from sft_ext.logging.init_logging import init_logging
+  from sft_ext.logging.init import init_logging
 
   init_logging()
 
@@ -17,7 +17,7 @@ from typing import TYPE_CHECKING
 from environment_init_vars import SETTINGS
 from ftp_configs import SFTSFTPClient
 from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
-from sft_ext.ftp.adapter import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
+from sft_ext.ftp import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
 
 if TYPE_CHECKING:
   # Third party imports
