@@ -34,23 +34,17 @@
     help       = "Version component to bump: major, minor, or patch"
 
 [tool.pyright]
-  extraPaths       = [
-    "src",
-  ]
+  extraPaths       = ["src"]
   typeCheckingMode = "standard"
 
   executionEnvironments = [
-    { root = "src", extraPaths = [
-      "src",
-    ] },
+    { root = "src", extraPaths = ["src"] },
   ]
 
 [tool.ruff]
   extend = "../pyproject.toml"
 
-  src = [
-    "./src",
-  ]
+  src = ["./src"]
 
 [tool.uv]
   environments = [
@@ -61,5 +55,5 @@
   [tool.uv.sources]
     sft-ext = [
       { git = "https://github.com/AetherBreaker/sft_ext", marker = "sys_platform == 'linux'", tag = "v1.0.0" },
-      { path = "D:\\SFT Software Projects\\sft_ext", editable = true, marker = "sys_platform == 'win32'" },
+      { path = "../sft_ext", editable = true, marker = "sys_platform == 'win32'" },
     ]

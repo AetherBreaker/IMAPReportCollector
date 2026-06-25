@@ -258,7 +258,7 @@ dependencies = [
     { name = "pydantic-settings", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "rich", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "sft-ext", version = "1.0.0", source = { git = "https://github.com/AetherBreaker/sft_ext?tag=v1.0.0#fe8289b3646ac7a0ad6e2c140d3460f613a7db0e" }, extra = ["sftp"], marker = "sys_platform == 'linux'" },
-    { name = "sft-ext", version = "1.0.0", source = { editable = "D:/SFT Software Projects/sft_ext" }, extra = ["sftp"], marker = "sys_platform == 'win32'" },
+    { name = "sft-ext", version = "1.1.0", source = { editable = "../sft_ext" }, extra = ["sftp"], marker = "sys_platform == 'win32'" },
     { name = "tzdata", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "uvloop", marker = "sys_platform == 'linux'" },
     { name = "winloop", marker = "sys_platform == 'win32'" },
@@ -275,7 +275,7 @@ requires-dist = [
     { name = "rich", specifier = ">=15.0.0" },
     { name = "sft-ext", extras = ["sftp"], marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = "==1.0.0" },
     { name = "sft-ext", extras = ["sftp"], marker = "sys_platform == 'linux'", git = "https://github.com/AetherBreaker/sft_ext?tag=v1.0.0" },
-    { name = "sft-ext", extras = ["sftp"], marker = "sys_platform == 'win32'", editable = "D:/SFT Software Projects/sft_ext" },
+    { name = "sft-ext", extras = ["sftp"], marker = "sys_platform == 'win32'", editable = "../sft_ext" },
     { name = "tzdata", specifier = ">=2026.1" },
     { name = "uvloop", marker = "sys_platform == 'linux'", specifier = ">=0.22.1" },
     { name = "winloop", marker = "sys_platform == 'win32'", specifier = ">=0.6.0" },
@@ -532,12 +532,13 @@ sftp = [
 
 [[package]]
 name = "sft-ext"
-version = "1.0.0"
-source = { editable = "D:/SFT Software Projects/sft_ext" }
+version = "1.1.0"
+source = { editable = "../sft_ext" }
 resolution-markers = [
     "sys_platform == 'win32'",
 ]
 dependencies = [
+    { name = "aiologic", marker = "sys_platform == 'win32'" },
     { name = "pydantic-settings", marker = "sys_platform == 'win32'" },
     { name = "rich", marker = "sys_platform == 'win32'" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
@@ -550,7 +551,7 @@ sftp = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiologic", marker = "extra == 'async'", specifier = ">=0.16.0" },
+    { name = "aiologic", specifier = ">=0.16.0" },
     { name = "paramiko", marker = "extra == 'sftp'", specifier = ">=5.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.1" },
     { name = "python-dateutil", marker = "extra == 'dateutil'", specifier = ">=2.9.0.post0" },
@@ -563,7 +564,6 @@ provides-extras = ["async", "dateutil", "sftp"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "aiologic", specifier = ">=0.16.0" },
     { name = "paramiko", specifier = ">=5.0.0" },
     { name = "pyright", specifier = ">=1.1.409" },
     { name = "python-dateutil", specifier = ">=2.9.0.post0" },
