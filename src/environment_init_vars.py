@@ -13,7 +13,7 @@ if os.name != "nt" and hasattr(os, "geteuid") and os.geteuid() == 0:
 
 
 # Settings
-SETTINGS = Settings()  # type: ignore
+SETTINGS = Settings.get_settings()
 
 # Folder paths
 CWD = Path.cwd()

@@ -1,9 +1,9 @@
 # heartrate
 if __name__ == "__main__":
   # First party imports
-  from sft_ext.logging.init import init_logging
+  from sft_ext import initialize_async
 
-  init_logging()
+  initialize_async()
 
 # Standard library imports
 from asyncio import AbstractEventLoop, Queue, TaskGroup, get_running_loop, to_thread

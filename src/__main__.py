@@ -6,7 +6,7 @@ if __name__ == "__main__":
   from rich.console import Console
 
   # First party imports
-  from sft_ext.logging.init import init_logging
+  from sft_ext import initialize_async
 
   RICH_CONSOLE = Console(
     width=None if platform == "win32" else 165,
@@ -15,7 +15,7 @@ if __name__ == "__main__":
   PROJECT_NAME = "IMAPReportCollector"
   LOGGING_TYPE = "daily"
 
-  init_logging()
+  initialize_async()
 else:
   # Third party imports
   from rich import get_console
@@ -24,7 +24,7 @@ else:
 
 # Standard library imports
 import sys
-from asyncio import Queue, create_task, get_running_loop, sleep
+from asyncio import Queue, create_task, get_running_loop, run, sleep
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from logging import getLogger
@@ -142,14 +142,4 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
 
 
 if __name__ == "__main__":
-  # Standard library imports
-  from sys import platform
-
-  if platform in ("win32", "cygwin", "cli"):
-    # Third party imports
-    from winloop import run
-  else:
-    # if we're on apple or linux do this instead
-    # Third party imports
-    from uvloop import run  # type: ignore
   run(main())
