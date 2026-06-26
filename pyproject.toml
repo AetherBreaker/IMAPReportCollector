@@ -1,6 +1,6 @@
 [project]
   name            = "imapreportcollector"
-  version         = "0.2.5"
+  version         = "0.2.6"
   requires-python = ">=3.14"
   dependencies    = [
     "aiologic==0.16.*",
@@ -9,7 +9,7 @@
     "paramiko>=5.0.0",
     "pydantic-settings>=2.14.1",
     "rich>=15.0.0",
-    "sft-ext[sftp]==1.3.1",
+    "sft-ext[sftp]==1.3.3",
     "tzdata>=2026.1",
     "uvloop>=0.22.1 ; sys_platform == 'linux'",
     "winloop>=0.6.0 ; sys_platform == 'win32'",
@@ -46,5 +46,5 @@
 [tool.uv]
   [tool.uv.sources]
     sft-ext = [
-      { git = "https://github.com/AetherBreaker/sft_ext", tag = "v1.3.1" },
+      { git = "https://github.com/AetherBreaker/sft_ext", tag = "v1.3.3" },
     ]
