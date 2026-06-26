@@ -7,11 +7,11 @@ from logging import getLogger
 from socket import gaierror
 
 # Third party imports
+from aeth_ext.ftp import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
 from paramiko import AutoAddPolicy, SFTPClient, SSHClient
 
 # First party imports
 from environment_init_vars import SETTINGS
-from sft_ext.ftp import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
 
 logger = getLogger(__name__)
 

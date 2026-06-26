@@ -1,7 +1,7 @@
 # heartrate
 if __name__ == "__main__":
-  # First party imports
-  from sft_ext import initialize
+  # Third party imports
+  from aeth_ext import initialize
 
   initialize()
 
@@ -15,11 +15,11 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 # Third party imports
+from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 from imap_tools import A, MailBox, MailMessage
 
 # First party imports
 from environment_init_vars import SETTINGS
-from sft_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 
 if TYPE_CHECKING:
   # Standard library imports

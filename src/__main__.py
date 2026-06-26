@@ -3,10 +3,8 @@ if __name__ == "__main__":
   from sys import platform
 
   # Third party imports
+  from aeth_ext import initialize
   from rich.console import Console
-
-  # First party imports
-  from sft_ext import initialize
 
   RICH_CONSOLE = Console(
     width=None if platform == "win32" else 165,
@@ -31,11 +29,13 @@ from logging import getLogger
 from threading import Thread
 from typing import TYPE_CHECKING, NoReturn
 
+# Third party imports
+from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_async
+
 # First party imports
 from email_monitoring import start_imap_email_monitoring
 from email_processing import direct_email_processing
 from environment_init_vars import SETTINGS
-from sft_ext.errors import FATAL_EVENT, handle_fatal_exc_async
 
 if TYPE_CHECKING:
   # Standard library imports

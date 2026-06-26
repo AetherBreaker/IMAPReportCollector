@@ -1,7 +1,7 @@
 # heartrate
 if __name__ == "__main__":
-  # First party imports
-  from sft_ext import initialize
+  # Third party imports
+  from aeth_ext import initialize
 
   initialize(asyncio=True)
 
@@ -13,11 +13,13 @@ from pathlib import PurePosixPath
 from re import Pattern, compile
 from typing import TYPE_CHECKING
 
+# Third party imports
+from aeth_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
+from aeth_ext.ftp import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
+
 # First party imports
 from environment_init_vars import SETTINGS
 from ftp_configs import SFTSFTPClient
-from sft_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
-from sft_ext.ftp import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
 
 if TYPE_CHECKING:
   # Third party imports
