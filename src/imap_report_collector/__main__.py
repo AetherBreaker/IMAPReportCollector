@@ -33,9 +33,9 @@ from typing import TYPE_CHECKING, NoReturn
 from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_async
 
 # First party imports
-from email_monitoring import start_imap_email_monitoring
-from email_processing import direct_email_processing
-from environment_init_vars import SETTINGS
+from imap_report_collector.email_monitoring import start_imap_email_monitoring
+from imap_report_collector.email_processing import direct_email_processing
+from imap_report_collector.environment_init_vars import SETTINGS
 
 if TYPE_CHECKING:
   # Standard library imports

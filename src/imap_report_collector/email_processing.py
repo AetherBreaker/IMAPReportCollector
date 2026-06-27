@@ -18,8 +18,8 @@ from aeth_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
 from aeth_ext.ftp import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
 
 # First party imports
-from environment_init_vars import SETTINGS
-from ftp_configs import SFTSFTPClient
+from imap_report_collector.environment_init_vars import SETTINGS
+from imap_report_collector.ftp_configs import SFTSFTPClient
 
 if TYPE_CHECKING:
   # Third party imports

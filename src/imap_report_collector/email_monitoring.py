@@ -19,7 +19,7 @@ from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 from imap_tools import A, MailBox, MailMessage
 
 # First party imports
-from environment_init_vars import SETTINGS
+from imap_report_collector.environment_init_vars import SETTINGS
 
 if TYPE_CHECKING:
   # Standard library imports

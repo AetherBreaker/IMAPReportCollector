@@ -11,7 +11,7 @@ from aeth_ext.ftp import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
 from paramiko import AutoAddPolicy, SFTPClient, SSHClient
 
 # First party imports
-from environment_init_vars import SETTINGS
+from imap_report_collector.environment_init_vars import SETTINGS
 
 logger = getLogger(__name__)
 
