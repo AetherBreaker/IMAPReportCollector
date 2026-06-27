@@ -53,7 +53,7 @@ if not __debug__:
   def write_heartbeat():
     """Write current timestamp to heartbeat file for health monitoring."""
     try:
-      HEARTBEAT_FILE.write_text(datetime.now(SETTINGS.tz).isoformat())  # type: ignore
+      HEARTBEAT_FILE.write_text(datetime.now(SETTINGS.tz).isoformat())
     except Exception as e:
       logger.error(f"Failed to write heartbeat: {e}")
 else:
@@ -134,11 +134,9 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   periodic_heartbeat_task.cancel()
 
   if SETTINGS.realtime_monitor:
-    executor.shutdown(wait=True)  # type: ignore
+    executor.shutdown(wait=True)  # pyright: ignore[reportPossiblyUnboundVariable]
 
   sys.exit(1)
-
-  raise RuntimeError("How did we get here? The main function should never exit normally.")
 
 
 if __name__ == "__main__":

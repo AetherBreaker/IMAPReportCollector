@@ -5,6 +5,7 @@ from __future__ import annotations
 from json import loads
 from logging import getLogger
 from socket import gaierror
+from typing import override
 
 # Third party imports
 from aeth_ext.ftp import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
@@ -21,6 +22,7 @@ class SFTSFTPClient(SFTPProtocol):
   creds = loads(SETTINGS.sft_website_creds_file.read_text())
   KIND = ProtocolEnum.SFTP
 
+  @override
   def get_conn_handler(self) -> SFTPClient:
     try:
       self.ssh_client = SSHClient()
@@ -50,6 +52,7 @@ class SFTSFTPClient(SFTPProtocol):
 
     return self.handler
 
+  @override
   def close_conn_handler(self) -> None:
     self.handler.close()
     self.ssh_client.close()

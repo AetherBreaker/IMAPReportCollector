@@ -18,8 +18,8 @@ from typing import TYPE_CHECKING
 from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 from imap_tools import A, MailBox, MailMessage
 
-# First party imports
-from imap_report_collector.environment_init_vars import SETTINGS
+# Local folder imports
+from .environment_init_vars import SETTINGS
 
 if TYPE_CHECKING:
   # Standard library imports
@@ -134,7 +134,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
 
         logger.info("  Finished processing IMAP IDLE response.\n")
     except (socket_error, IMAP4.abort) as e:
-      if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:
+      if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:  # pyright: ignore[reportUnnecessaryIsInstance]
         # reraise otherwise
         raise e
       logger.warning(f"Socket error occurred (likely due to server closing connection): {e}. Will attempt to reconnect.")

@@ -1,0 +1,9 @@
+# ruff: noqa: ANN001
+# pyright: reportMissingParameterType=false
+
+def all(_path):  # -> Literal[True]:  # noqa: A001
+  ...
+def path_contains(*subs):  # -> Callable[..., bool]:
+  ...
+def contains_regex(pattern):  # -> Callable[..., bool]:
+  ...

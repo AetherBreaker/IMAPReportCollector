@@ -17,9 +17,9 @@ from typing import TYPE_CHECKING
 from aeth_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
 from aeth_ext.ftp import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
 
-# First party imports
-from imap_report_collector.environment_init_vars import SETTINGS
-from imap_report_collector.ftp_configs import SFTSFTPClient
+# Local folder imports
+from .environment_init_vars import SETTINGS
+from .ftp_configs import SFTSFTPClient
 
 if TYPE_CHECKING:
   # Third party imports
@@ -45,7 +45,7 @@ async def direct_email_processing(queue: Queue[MailMessage]):
 
 # Regex pattern for matching email subjects
 # test - Wed, Apr 8, 2026 3:15 PM
-SUBJECT_PATTERN: Pattern = compile(
+SUBJECT_PATTERN: Pattern[str] = compile(
   r"^(Report: )?(?P<report_name>.*) - (?P<timestamp>"
   r"(Mon|Tue|Wed|Thu|Fri|Sat|Sun), "
   r"(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) "
