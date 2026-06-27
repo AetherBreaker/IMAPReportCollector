@@ -71,4 +71,4 @@ USER nonroot
 
 # Run the application.
 WORKDIR /app
-CMD ["uv", "run", "-m", "${PACKAGE_NAME}"]
+CMD ["sh", "-c", "MODULE_NAME=$(printf '%s' \"$PACKAGE_NAME\" | tr '-' '_'); exec uv run -m \"$MODULE_NAME\""]
