@@ -9,7 +9,7 @@
             "type": "debugpy",
             "request": "launch",
             "justMyCode": false,
-            "program": "${workspaceFolder}\\src\\",
+            "program": "${workspaceFolder}/src/imap_report_collector/",
             "cwd": "${workspaceFolder}",
             "envFile": "${workspaceFolder}/.env",
             "env": {
