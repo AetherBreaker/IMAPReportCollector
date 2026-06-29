@@ -41,4 +41,4 @@ class Settings(BaseSettings):
 
   @property
   def sft_website_creds_file(self) -> Path:
-    return self.creds_file_reusable("SFT website creds file not found at expected location", "secrets", "sft_ftp_creds.json")
+    return self._creds_file_reusable("SFT website creds file not found at expected location", "secrets", "sft_ftp_creds.json")
