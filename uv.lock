@@ -380,7 +380,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/c9/91/48a93414f70a973b6
 
 [[package]]
 name = "imap-report-collector"
-version = "0.3.5"
+version = "0.3.6"
 source = { editable = "." }
 dependencies = [
     { name = "aeth-ext", version = "2.0.5", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
