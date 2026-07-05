@@ -14,7 +14,7 @@ supported-markers = [
 
 [[package]]
 name = "aeth-ext"
-version = "2.0.5"
+version = "3.0.0"
 source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'linux'",
@@ -27,9 +27,9 @@ dependencies = [
     { name = "rich", marker = "sys_platform == 'linux'" },
     { name = "tzdata", marker = "sys_platform == 'linux'" },
 ]
-sdist = { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/41c/8a88c0fa65505/aeth_ext-2.0.5.tar.gz", hash = "sha256:41c8a88c0fa65505c94ab0828da873f5fd424eec4a2cd2b05870c539253d1365" }
+sdist = { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/294/b19f5803a84a7/aeth_ext-3.0.0.tar.gz", hash = "sha256:294b19f5803a84a75d5b544b0cd8e6a3c0b8b1b61fc6e18322e80d40c094f934" }
 wheels = [
-    { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/d00/0c662ac9e45b8/aeth_ext-2.0.5-py3-none-any.whl", hash = "sha256:d000c662ac9e45b83e0399d3f4c3ceab699c63ad35e39ad03252c3c564d58c5d" },
+    { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/809/d4fe9ba92f08d/aeth_ext-3.0.0-py3-none-any.whl", hash = "sha256:809d4fe9ba92f08d3d21babcaa0b377f7a01490fe6184c189aabd4c8fee10bbb" },
 ]
 
 [package.optional-dependencies]
@@ -42,7 +42,7 @@ sftp = [
 
 [[package]]
 name = "aeth-ext"
-version = "2.1.1"
+version = "3.0.0"
 source = { editable = "../aeth_ext" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
@@ -383,8 +383,8 @@ name = "imap-report-collector"
 version = "0.3.6"
 source = { editable = "." }
 dependencies = [
-    { name = "aeth-ext", version = "2.0.5", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
-    { name = "aeth-ext", version = "2.1.1", source = { editable = "../aeth_ext" }, extra = ["async", "sftp"], marker = "sys_platform == 'win32'" },
+    { name = "aeth-ext", version = "3.0.0", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
+    { name = "aeth-ext", version = "3.0.0", source = { editable = "../aeth_ext" }, extra = ["async", "sftp"], marker = "sys_platform == 'win32'" },
     { name = "aiologic", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "heartrate", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "imap-tools", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
@@ -395,7 +395,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "poe-tasks", version = "3.0.0", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, marker = "sys_platform == 'linux'" },
+    { name = "poe-tasks", version = "4.0.0", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, marker = "sys_platform == 'linux'" },
     { name = "poe-tasks", version = "4.0.0", source = { editable = "../poe_tasks" }, marker = "sys_platform == 'win32'" },
     { name = "poethepoet", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "pyright", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
@@ -403,8 +403,8 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = ">=2.0.5" },
-    { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform == 'linux'", specifier = ">=2.0.5", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
+    { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = ">=3.0.0" },
+    { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform == 'linux'", specifier = ">=3.0.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
     { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform == 'win32'", editable = "../aeth_ext" },
     { name = "aiologic", specifier = ">=0.16.0" },
     { name = "heartrate", specifier = ">=0.2.2" },
@@ -416,8 +416,8 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "poe-tasks", marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = ">=1.1.0" },
-    { name = "poe-tasks", marker = "sys_platform == 'linux'", specifier = ">=1.1.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
+    { name = "poe-tasks", marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = ">=4.0.0" },
+    { name = "poe-tasks", marker = "sys_platform == 'linux'", specifier = ">=4.0.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
     { name = "poe-tasks", marker = "sys_platform == 'win32'", editable = "../poe_tasks" },
     { name = "poethepoet", specifier = ">=0.46.0" },
     { name = "pyright", specifier = ">=1.1.411" },
@@ -654,7 +654,7 @@ wheels = [
 
 [[package]]
 name = "poe-tasks"
-version = "3.0.0"
+version = "4.0.0"
 source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'linux'",
@@ -664,9 +664,9 @@ dependencies = [
     { name = "poethepoet", marker = "sys_platform == 'linux'" },
     { name = "poethepoet-tasks", marker = "sys_platform == 'linux'" },
 ]
-sdist = { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/69c/cb99b14bba6bd/poe_tasks-3.0.0.tar.gz", hash = "sha256:69ccb99b14bba6bd73c470ccbeb4b9f967e77c6005767f6b38bdee3c57a3f490" }
+sdist = { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/a53/d248e0c8859bc/poe_tasks-4.0.0.tar.gz", hash = "sha256:a53d248e0c8859bcf25ed5218b1ea27be8189a9de0aa3f9114ec5809e3d512d4" }
 wheels = [
-    { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/0c3/7c8283f0a2115/poe_tasks-3.0.0-py3-none-any.whl", hash = "sha256:0c37c8283f0a21159444f279c7e3b321024d705e35f82590db3a8044741ee402" },
+    { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/95d/264c6b06ebaf4/poe_tasks-4.0.0-py3-none-any.whl", hash = "sha256:95d264c6b06ebaf42d10a5cbb73c8b1704d2c80b1f5adc1d5ea1de485ba93f3f" },
 ]
 
 [[package]]

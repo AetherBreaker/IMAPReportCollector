@@ -3,7 +3,7 @@
   version         = "0.3.6"
   requires-python = ">=3.14"
   dependencies    = [
-    "aeth-ext[sftp,async]>=2.0.5",
+    "aeth-ext[sftp, async]>=3.0.0",
     "aiologic>=0.16.0",
     "heartrate>=0.2.2",
     "imap-tools>=1.11.1",
@@ -14,7 +14,7 @@
 
 [dependency-groups]
   dev = [
-    "poe-tasks>=1.1.0",
+    "poe-tasks>=4.0.0",
     "poethepoet>=0.46.0",
     "pyright>=1.1.411",
   ]
