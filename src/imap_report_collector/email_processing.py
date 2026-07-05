@@ -39,7 +39,7 @@ async def direct_email_processing(queue: Queue[MailMessage]):
         break
       logger.info("Waiting for emails to be added to queue...")
       email_data = await queue.get()
-      logger.info(f"Email with subject '{email_data.subject}' retrieved from queue for processing.")
+      logger.info("Email with subject '%s' retrieved from queue for processing.", email_data.subject)
       subtasks.create_task(to_thread(process_email, email_data=email_data, queue=queue, loop=loop))
 
 
@@ -60,12 +60,12 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage], loop: Abst
   # sourcery skip: extract-method
   """Process a single email message."""
   # Placeholder for actual email processing logic
-  logger.info(f"Processing email with subject: {email_data.subject}")
+  logger.info("Processing email with subject: %s", email_data.subject)
 
   if match := SUBJECT_PATTERN.match(email_data.subject):
     report_name = match.group("report_name")
     # timestamp = match.group("timestamp")
-    logger.info(f"Email subject matched expected pattern. Extracted report name: '{report_name}'")
+    logger.info("Email subject matched expected pattern. Extracted report name: '%s'", report_name)
 
     logger.info("Testing FTP connection to server...")
     if not SWEETFIRE_SFTP.test_connection():
@@ -75,16 +75,16 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage], loop: Abst
 
     try:
       with SWEETFIRE_SFTP.start_session() as sftp_client:
-        logger.info(f"Connected to FTP server. Preparing to upload attachments for report '{report_name}'")
+        logger.info("Connected to FTP server. Preparing to upload attachments for report '%s'", report_name)
         target_folder = BASE_DIR / report_name
 
         # check if the a directory with a name that matches the report name exists on the FTP server, if not create it
-        logger.info(f"Querying FTP for {target_folder}")
+        logger.info("Querying FTP for %s", target_folder)
         dirs = [entry.filename for entry in sftp_client.listdir(path=BASE_DIR.as_posix())]
-        logger.info(f"Query for {target_folder} complete")
+        logger.info("Query for %s complete", target_folder)
         if str(target_folder.name) not in dirs:
           sftp_client.makedir(target_folder.as_posix())
-          logger.info(f"Created new directory on FTP server: {target_folder}")
+          logger.info("Created new directory on FTP server: %s", target_folder)
 
         logger.info("Directory check complete. Starting attachment upload...")
 
@@ -97,17 +97,17 @@ def process_email(email_data: MailMessage, queue: Queue[MailMessage], loop: Abst
             callback=bio.read,
             file_size=len(payload),
           )
-          logger.info(f"Attachment '{remote_path.name}' uploaded to '{remote_path.as_posix()}'")
+          logger.info("Attachment '%s' uploaded to '%s'", remote_path.name, remote_path.as_posix())
 
-      logger.info(f"Successfully processed email '{email_data.subject}' and uploaded attachments to FTP server.")
+      logger.info("Successfully processed email '%s' and uploaded attachments to FTP server.", email_data.subject)
 
       loop.call_soon_threadsafe(queue.task_done)
 
     except ServerNotAvailableError as e:
-      logger.error(f"Failed to process email due to FTP server issues: {e}")
+      logger.error("Failed to process email due to FTP server issues: %s", e)
       # re-add the email to the queue for retry after some delay
       # In a real implementation, you might want to implement an exponential backoff strategy here
       loop.call_soon_threadsafe(queue.put_nowait, email_data)
 
   else:
-    logger.warning(f"Email subject '{email_data.subject}' did not match expected pattern. Skipping")
+    logger.warning("Email subject '%s' did not match expected pattern. Skipping", email_data.subject)
