@@ -1,6 +1,6 @@
 # heartrate
 if __name__ == "__main__":
-  # Third party imports
+  # First party imports
   from aeth_ext import initialize
 
   initialize(asyncio=True)
@@ -13,9 +13,10 @@ from pathlib import PurePosixPath
 from re import Pattern, compile
 from typing import TYPE_CHECKING
 
-# Third party imports
+# First party imports
 from aeth_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
-from aeth_ext.ftp import AdaptedSFTP, FTPAdapter, ServerNotAvailableError
+from aeth_ext.ftp.adapter import AdaptedSFTP, FTPAdapter
+from aeth_ext.ftp.errors import ServerNotAvailableError
 
 # Local folder imports
 from .environment_init_vars import SETTINGS

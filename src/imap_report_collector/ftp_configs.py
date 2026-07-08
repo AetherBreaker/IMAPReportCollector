@@ -8,10 +8,11 @@ from socket import gaierror
 from typing import override
 
 # Third party imports
-from aeth_ext.ftp import ProtocolEnum, ServerNotAvailableError, SFTPProtocol
 from paramiko import AutoAddPolicy, SFTPClient, SSHClient
 
 # First party imports
+from aeth_ext.ftp.errors import ServerNotAvailableError
+from aeth_ext.ftp.types import ProtocolEnum, SFTPProtocol
 from imap_report_collector.environment_init_vars import SETTINGS
 
 logger = getLogger(__name__)
