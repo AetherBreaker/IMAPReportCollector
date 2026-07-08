@@ -56,11 +56,11 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
   # exists_but_unfound: set[int] = set()
 
   while True:
-    logger.info(f"Emails currently in processing queue: {queue.qsize()}")
+    logger.info("Emails currently in processing queue: %s", queue.qsize())
     sleep(0)  # Yield control to allow the main thread to run
 
-    logger.info(f"Connecting to IMAP server {SETTINGS.watch_imap_server}:{SETTINGS.watch_imap_port}")
-    logger.info(f"  Using email: {SETTINGS.watch_email}")
+    logger.info("Connecting to IMAP server %s:%s", SETTINGS.watch_imap_server, SETTINGS.watch_imap_port)
+    logger.info("  Using email: %s", SETTINGS.watch_email)
     try:
       with MailBox(
         host=SETTINGS.watch_imap_server,
@@ -79,10 +79,10 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
             no_keyword="AutoMon_Seen",
           )
         ):
-          logger.info(f"  Previously unfound email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
+          logger.info("  Previously unfound email found with UID: %s, subject: %s. Adding to processing queue.", msg.uid, msg.subject)
           loop.call_soon_threadsafe(queue.put_nowait, msg)
           if msg.uid is not None:
-            logger.info(f"  Email with UID {msg.uid} found and added to queue.")
+            logger.info("  Email with UID %s found and added to queue.", msg.uid)
 
         logger.info("Entering IMAP IDLE mode to wait for new emails...")
         with mailbox.idle as idle:
@@ -93,23 +93,24 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
           break
 
         if not responses:
-          logger.info(f"no updates in {SETTINGS.watch_polling_timeout_sec} sec\n")
+          logger.info("no updates in %s sec\n", SETTINGS.watch_polling_timeout_sec)
           continue
 
-        logger.info(f"  IMAP IDLE response received: {responses}. Refreshing mailbox")
+        logger.info("  IMAP IDLE response received: %s. Refreshing mailbox", responses)
         mailbox.folder.set("Inbox")
 
         match = RESPONSE_UID_PATTERN.match(responses[0].decode())
         if match is None:
-          logger.error(f"  Received IMAP response did not match expected pattern: {responses[0].decode()}.")
+          logger.error("  Received IMAP response did not match expected pattern: %s.", responses[0].decode())
           continue
 
         logger.info(
           "  Attempting fetch for emails with the following criteria:"
           "    From: emails@mailing.goftx.com\n"
-          f"    Date >= {STATIC_DATE_FILTER}\n"
+          "    Date >= %s\n"
           "    Text contains: 'report contents'\n"
-          "    Does not have keyword: 'AutoMon_Seen'"
+          "    Does not have keyword: 'AutoMon_Seen'",
+          STATIC_DATE_FILTER
         )
 
         # fetch_found = False
@@ -122,7 +123,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
           ),
         ):
           # fetch_found = True
-          logger.info(f"    New email found with UID: {msg.uid}, subject: {msg.subject}. Adding to processing queue.")
+          logger.info("    New email found with UID: %s, subject: %s. Adding to processing queue.", msg.uid, msg.subject)
           loop.call_soon_threadsafe(queue.put_nowait, msg)
           if msg.uid is not None:
             flag_as_seen(msg, mailbox)
@@ -137,12 +138,12 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
       if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:  # pyright: ignore[reportUnnecessaryIsInstance]
         # reraise otherwise
         raise e
-      logger.warning(f"Socket error occurred (likely due to server closing connection): {e}. Will attempt to reconnect.")
+      logger.warning("Socket error occurred (likely due to server closing connection): %s. Will attempt to reconnect.", e)
 
 
 def flag_as_seen(msg: MailMessage, mailbox: MailBox):
   assert msg.uid is not None, "This is impossible."
-  logger.info(f"    Flagging {msg.uid} as seen")
+  logger.info("    Flagging %s as seen", msg.uid)
   mailbox.flag(msg.uid, "AutoMon_Seen", value=True)
   # mailbox.flag(msg.uid, MailMessageFlags.SEEN, True)
-  logger.info(f"    {msg.uid} flagged as seen")
+  logger.info("    %s flagged as seen", msg.uid)

@@ -55,7 +55,7 @@ if not __debug__:
     try:
       HEARTBEAT_FILE.write_text(datetime.now(SETTINGS.tz).isoformat())
     except Exception as e:
-      logger.error(f"Failed to write heartbeat: {e}")
+      logger.error("Failed to write heartbeat: %s", e)
 else:
 
   def write_heartbeat():
@@ -69,7 +69,7 @@ async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
     try:
       func()
     except Exception as e:
-      logger.error(f"Error in periodic task: {e}")
+      logger.error("Error in periodic task: %s", e)
     await sleep(interval)
 
 
