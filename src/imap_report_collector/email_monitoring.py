@@ -1,6 +1,6 @@
 # heartrate
 if __name__ == "__main__":
-  # Third party imports
+  # First party imports
   from aeth_ext import initialize
 
   initialize()
@@ -15,8 +15,10 @@ from time import sleep
 from typing import TYPE_CHECKING
 
 # Third party imports
-from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 from imap_tools import A, MailBox, MailMessage
+
+# First party imports
+from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_sync
 
 # Local folder imports
 from .environment_init_vars import SETTINGS
@@ -110,7 +112,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
           "    Date >= %s\n"
           "    Text contains: 'report contents'\n"
           "    Does not have keyword: 'AutoMon_Seen'",
-          STATIC_DATE_FILTER
+          STATIC_DATE_FILTER,
         )
 
         # fetch_found = False
@@ -134,7 +136,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
         #   exists_but_unfound.add(int(match.group("uid")))
 
         logger.info("  Finished processing IMAP IDLE response.\n")
-    except (socket_error, IMAP4.abort) as e:
+    except (socket_error, IMAP4.abort, ConnectionRefusedError) as e:
       if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:  # pyright: ignore[reportUnnecessaryIsInstance]
         # reraise otherwise
         raise e
