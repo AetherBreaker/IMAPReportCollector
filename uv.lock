@@ -66,13 +66,9 @@ sftp = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiohttp", marker = "extra == 'commands'", specifier = ">=3.14.1" },
     { name = "aiohttp", marker = "extra == 'logserver'", specifier = ">=3.14.1" },
     { name = "aiologic", specifier = ">=0.16.0" },
     { name = "cloudpickle", marker = "extra == 'logserver'", specifier = ">=3.1.2" },
-    { name = "fastapi", extras = ["standard-no-fastapi-cloud-cli"], marker = "extra == 'commands'", specifier = ">=0.139.0" },
-    { name = "fastapi", extras = ["standard-no-fastapi-cloud-cli"], marker = "extra == 'logserver'", specifier = ">=0.139.0" },
-    { name = "orjson", marker = "extra == 'commands'", specifier = ">=3.11.9" },
     { name = "orjson", marker = "extra == 'logserver'", specifier = ">=3.11.9" },
     { name = "paramiko", marker = "extra == 'sftp'", specifier = ">=5.0.0" },
     { name = "pydantic-settings", specifier = ">=2.14.1" },
@@ -85,19 +81,15 @@ requires-dist = [
     { name = "typer", marker = "extra == 'logserver'", specifier = ">=0.26.8" },
     { name = "tzdata", specifier = ">=2026.2" },
     { name = "uvloop", marker = "sys_platform == 'linux' and extra == 'async'", specifier = ">=0.22.1" },
-    { name = "uvloop", marker = "sys_platform == 'linux' and extra == 'logserver'", specifier = ">=0.22.1" },
     { name = "winloop", marker = "sys_platform == 'win32' and extra == 'async'", specifier = ">=0.6.0" },
-    { name = "winloop", marker = "sys_platform == 'win32' and extra == 'logserver'", specifier = ">=0.6.0" },
 ]
-provides-extras = ["async", "commands", "logserver", "sftp"]
+provides-extras = ["async", "logserver", "sftp"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "aiohttp", specifier = ">=3.14.1" },
     { name = "cloudpickle", specifier = ">=3.1.2" },
     { name = "debugpy", specifier = ">=1.8.21" },
-    { name = "fastapi", extras = ["standard-no-fastapi-cloud-cli"], specifier = ">=0.139.0" },
-    { name = "orjson", specifier = ">=3.11.9" },
     { name = "paramiko", specifier = ">=5.0.0" },
     { name = "poe-tasks", specifier = ">=4.0.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
     { name = "pre-commit", specifier = ">=4.2.0" },
@@ -418,7 +410,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/c9/91/48a93414f70a973b6
 
 [[package]]
 name = "imap-report-collector"
-version = "0.4.2"
+version = "0.4.3"
 source = { editable = "." }
 dependencies = [
     { name = "aeth-ext", version = "3.3.5", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
