@@ -5,11 +5,8 @@ FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS builder
 
 WORKDIR /app
 
-ARG PACKAGE_NAME
-ARG PACKAGE_VERSION
-ARG SFTPYPI_INDEX_URL=https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple
-ARG PYPI_INDEX_URL=https://pypi.org/simple
-ARG UV_INDEX_STRATEGY=unsafe-best-match
+ARG GIT_TAG
+ARG GIT_REPO
 
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
@@ -21,16 +18,23 @@ ENV UV_LINK_MODE=copy
 RUN apt-get update && apt-get install -y --no-install-recommends git \
   && rm -rf /var/lib/apt/lists/*
 
-# Use the repository pyproject to resolve and install dependencies into the builder venv.
-COPY pyproject.toml /app/pyproject.toml
+# Clone only the dependency manifest files first so the dep install layer
+# can be cached independently of source code changes.
+RUN git clone --depth 1 --branch "${GIT_TAG}" "${GIT_REPO}" /tmp/repo && \
+  mv /tmp/repo/pyproject.toml /tmp/repo/uv.lock /tmp/repo/README.md /app/
+
+# Install all dependencies (without the project itself) using the frozen lockfile.
+# This layer is cached as long as pyproject.toml/uv.lock don't change, even
+# when only source code changes between deployments.
+RUN --mount=type=cache,target=/root/.cache/uv \
+  uv sync --frozen --no-dev --no-install-project
+
+# Now bring in the source tree and install the project itself as a
+# non-editable wheel so the source tree is not required at runtime.
+RUN mv /tmp/repo/src /app/src && rm -rf /tmp/repo
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv venv /app/.venv \
-  && uv pip install --python /app/.venv/bin/python \
-  --index-url ${SFTPYPI_INDEX_URL} \
-  --extra-index-url ${PYPI_INDEX_URL} \
-  --index-strategy ${UV_INDEX_STRATEGY} \
-  ${PACKAGE_NAME}==${PACKAGE_VERSION}
+  uv sync --frozen --no-dev --no-editable 
 
 # ---- Final stage ----
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
@@ -53,15 +57,11 @@ ENV PYTHONOPTIMIZE=1
 COPY --from=builder /app/.venv /app/.venv
 
 # Create runtime writable directories and grant ownership to the non-root user.
-RUN mkdir -p /app/persisted_data /app/file_holding /app/timeclock_playground \
-  && chown -R 999:999 /app/persisted_data /app/file_holding /app/timeclock_playground
+RUN mkdir -p /app/persisted_data \
+  && chown -R 999:999 /app/persisted_data
 
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
-
-# Re-declare build arg and persist as ENV so it is available at runtime
-ARG PACKAGE_NAME
-ENV PACKAGE_NAME=${PACKAGE_NAME}
 
 # Reset the image entrypoint so we can explicitly invoke uv in CMD
 ENTRYPOINT []
@@ -71,4 +71,4 @@ USER nonroot
 
 # Run the application.
 WORKDIR /app
-CMD ["sh", "-c", "MODULE_NAME=$(printf '%s' \"$PACKAGE_NAME\" | tr '-' '_'); exec uv run -m \"$MODULE_NAME\""]
+CMD ["uv", "run", "-m", "imap_report_collector"]

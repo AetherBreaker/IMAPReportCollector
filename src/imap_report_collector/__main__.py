@@ -3,17 +3,19 @@ if __name__ == "__main__":
   from sys import platform
 
   # Third party imports
-  from aeth_ext import initialize
   from rich.console import Console
+
+  # First party imports
+  from aeth_ext import initialize
 
   RICH_CONSOLE = Console(
     width=None if platform == "win32" else 165,
     log_time=platform == "win32",
   )
-  PROJECT_NAME = "IMAPReportCollector"
+  PROJECT_NAME = "imap-report-collector"
   LOGGING_TYPE = "daily"
 
-  initialize(asyncio=True)
+  initialize(asyncio=True, logging="socket")
 else:
   # Third party imports
   from rich import get_console
@@ -29,10 +31,8 @@ from logging import getLogger
 from threading import Thread
 from typing import TYPE_CHECKING, NoReturn
 
-# Third party imports
-from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_async
-
 # First party imports
+from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_async
 from imap_report_collector.email_monitoring import start_imap_email_monitoring
 from imap_report_collector.email_processing import direct_email_processing
 from imap_report_collector.environment_init_vars import SETTINGS
