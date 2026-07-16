@@ -139,5 +139,9 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   sys.exit(1)
 
 
-if __name__ == "__main__":
+def run_app() -> None:
   run(main())
+
+
+if __name__ == "__main__":
+  run_app()

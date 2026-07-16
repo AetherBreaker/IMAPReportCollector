@@ -12,6 +12,9 @@
     "tzdata>=2026.1",
   ]
 
+  [project.scripts]
+    launch-app = "imap_report_collector.__main__:run_app"
+
 [dependency-groups]
   dev = [
     "poe-tasks>=4.0.0",
