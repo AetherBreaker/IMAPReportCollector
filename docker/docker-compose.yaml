@@ -1,15 +1,23 @@
 services:
+  init:
+    image: busybox
+    user: root
+    volumes:
+      - type: bind
+        source: /data/imap_report_collector_files
+        target: /app/persisted_data
+    command: chown -R 999:999 /app/persisted_data
   imap-report-collector:
     build:
       context: .
       dockerfile: Dockerfile
       args:
-        PACKAGE_NAME: imap-report-collector
-        PACKAGE_VERSION: 0.5.0
-        SFTPYPI_INDEX_URL: ${SFTPYPI_INDEX_URL:-https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple}
-        PYPI_INDEX_URL: ${PYPI_INDEX_URL:-https://pypi.org/simple}
+        GIT_TAG: v0.5.0
+        GIT_REPO: https://github.com/AetherBreaker/IMAPReportCollector.git
     container_name: imap-report-collector
     restart: no
+    networks:
+      - coolify
     expose:
       - "9999"
       - "9998"
@@ -43,3 +51,6 @@ services:
       - ALERTS_EMAIL=info@sweetfiretobacco.com
       - ALERTS_EMAIL_PWD=${ALERTS_EMAIL_PWD:?}
       - ALERTS_RECIPIENTS=["jacob.ogden@sweetfiretobacco.com"]
+networks:
+  coolify:
+    external: true

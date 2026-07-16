@@ -20,8 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 
 # Clone only the dependency manifest files first so the dep install layer
 # can be cached independently of source code changes.
-RUN git clone --depth 1 --branch "${GIT_TAG}" "${GIT_REPO}" /tmp/repo && \
-  mv /tmp/repo/pyproject.toml /tmp/repo/uv.lock /tmp/repo/README.md /app/
+RUN git clone --depth 1 --branch "${GIT_TAG}" "${GIT_REPO}" /tmp/repo \
+  && mv /tmp/repo/pyproject.toml /tmp/repo/uv.lock /app/ \
+  && readme_file=$(python3 -c "import tomllib, sys; d=tomllib.load(open('/app/pyproject.toml','rb')); print(d.get('project',{}).get('readme',''))" 2>/dev/null) \
+  && [ -n "${readme_file}" ] && [ -f "/tmp/repo/${readme_file}" ] && mv "/tmp/repo/${readme_file}" /app/ || true
 
 # Install all dependencies (without the project itself) using the frozen lockfile.
 # This layer is cached as long as pyproject.toml/uv.lock don't change, even
@@ -34,7 +36,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 RUN mv /tmp/repo/src /app/src && rm -rf /tmp/repo
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --frozen --no-dev --no-editable 
+  uv sync --frozen --no-dev --no-editable
 
 # ---- Final stage ----
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
@@ -56,10 +58,6 @@ ENV PYTHONOPTIMIZE=1
 # Copy the virtual environment from the builder stage
 COPY --from=builder /app/.venv /app/.venv
 
-# Create runtime writable directories and grant ownership to the non-root user.
-RUN mkdir -p /app/persisted_data \
-  && chown -R 999:999 /app/persisted_data
-
 # Place executables in the environment at the front of the path
 ENV PATH="/app/.venv/bin:$PATH"
 
@@ -71,4 +69,4 @@ USER nonroot
 
 # Run the application.
 WORKDIR /app
-CMD ["uv", "run", "-m", "imap_report_collector"]
+CMD ["launch-app"]
