@@ -8,6 +8,9 @@ WORKDIR /app
 ARG GIT_TAG
 ARG GIT_REPO
 
+# Copy helper scripts used during the build
+COPY scripts/ /app/scripts/
+
 # Enable bytecode compilation
 ENV UV_COMPILE_BYTECODE=1
 
@@ -22,21 +25,23 @@ RUN apt-get update && apt-get install -y --no-install-recommends git \
 # can be cached independently of source code changes.
 RUN git clone --depth 1 --branch "${GIT_TAG}" "${GIT_REPO}" /tmp/repo \
   && mv /tmp/repo/pyproject.toml /tmp/repo/uv.lock /app/ \
-  && readme_file=$(python3 -c "import tomllib, sys; d=tomllib.load(open('/app/pyproject.toml','rb')); print(d.get('project',{}).get('readme',''))" 2>/dev/null) \
+  && readme_file=$(uv run --no-project python /app/scripts/get_readme.py 2>/dev/null) \
   && [ -n "${readme_file}" ] && [ -f "/tmp/repo/${readme_file}" ] && mv "/tmp/repo/${readme_file}" /app/ || true
 
 # Install all dependencies (without the project itself) using the frozen lockfile.
 # This layer is cached as long as pyproject.toml/uv.lock don't change, even
 # when only source code changes between deployments.
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --frozen --no-dev --no-install-project
+  extras=$(uv run --no-project python /app/scripts/detect_app_extra.py) \
+  && uv sync --frozen --no-dev --no-install-project $extras
 
 # Now bring in the source tree and install the project itself as a
 # non-editable wheel so the source tree is not required at runtime.
 RUN mv /tmp/repo/src /app/src && rm -rf /tmp/repo
 
 RUN --mount=type=cache,target=/root/.cache/uv \
-  uv sync --frozen --no-dev --no-editable
+  extras=$(uv run --no-project python /app/scripts/detect_app_extra.py) \
+  && uv sync --frozen --no-dev --no-editable $extras
 
 # ---- Final stage ----
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim

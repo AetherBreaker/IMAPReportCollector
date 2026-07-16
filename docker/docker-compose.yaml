@@ -1,40 +1,26 @@
 services:
   init:
     image: busybox
-    user: root
     volumes:
       - type: bind
         source: /data/imap_report_collector_files
         target: /app/persisted_data
     command: chown -R 999:999 /app/persisted_data
+    user: root
+
   imap-report-collector:
+    container_name: imap-report-collector
     build:
       context: .
       dockerfile: Dockerfile
       args:
         GIT_TAG: v0.5.0
         GIT_REPO: https://github.com/AetherBreaker/IMAPReportCollector.git
-    container_name: imap-report-collector
     restart: no
-    networks:
-      - coolify
-    expose:
-      - "9999"
-      - "9998"
-      - "9997"
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - bash -ec '[ -f /app/persisted_data/logs/heartbeat.txt ] && ts=$$(cat
-          /app/persisted_data/logs/heartbeat.txt 2>/dev/null) && [ -n "$$ts" ]
-          && hb=$$(date -d "$$ts" +%s 2>/dev/null) && now=$$(date +%s) && [
-          $$((now - hb)) -lt 180 ]'
-      interval: 30s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
-
-    user: nonroot:nonroot
+    # expose:
+    #   - "9999"
+    #   - "9998"
+    #   - "9997"
     # Persist logs and queue backups
     volumes:
       - type: bind
@@ -51,6 +37,19 @@ services:
       - ALERTS_EMAIL=info@sweetfiretobacco.com
       - ALERTS_EMAIL_PWD=${ALERTS_EMAIL_PWD:?}
       - ALERTS_RECIPIENTS=["jacob.ogden@sweetfiretobacco.com"]
+    networks:
+      - coolify
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - bash -ec '[ -f /app/persisted_data/logs/heartbeat.txt ] && ts=$$(cat /app/persisted_data/logs/heartbeat.txt 2>/dev/null) && [ -n "$$ts" ] && hb=$$(date -d "$$ts" +%s 2>/dev/null) && now=$$(date +%s) && [ $$((now - hb)) -lt 180 ]'
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+    user: nonroot:nonroot
+
 networks:
   coolify:
     external: true
