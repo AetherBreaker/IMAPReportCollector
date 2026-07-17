@@ -12,6 +12,9 @@
     "tzdata>=2026.1",
   ]
 
+  [project.scripts]
+    run-app-imap-report-collector = "imap_report_collector.__main__:run_app"
+
 [dependency-groups]
   dev = [
     "poe-tasks>=4.0.0",
@@ -23,14 +26,43 @@
   requires      = ["uv_build>=0.11.2,<0.12.0"]
   build-backend = "uv_build"
 
+[tool.coverage.run]
+  data_file   = ".cache/.coverage"
+  source_pkgs = ["scheduled_invoice_processor"]
+
+[tool.coverage.report]
+  show_missing = true
+
+[tool.docker]
+  # Paths relative to /app that the entrypoint will chown to nonroot:nonroot.
+  # Typically these are directories that will be bind-mounted as Docker volumes.
+  chown_paths = [
+    "persisted_data",
+  ]
+  mkdirs      = [""]
+
 [tool.poe]
   include_script = "poe_tasks:tasks"
 
 [tool.pyright]
   extends = "../pyproject.toml"
 
+[tool.pytest.ini_options]
+  addopts      = [
+    "--cov",
+    "--cov-report=term-missing",
+    "--strict-markers",
+    "--strict-config",
+    "-ra"
+  ]
+  cache_dir    = ".cache/pytest"
+  testpaths    = ["tests"]
+  xfail_strict = true
+  asyncio_mode = "auto"
+
 [tool.ruff]
-  extend = "../pyproject.toml"
+  extend    = "../pyproject.toml"
+  cache-dir = ".cache/ruff"
 
   src = ["./src"]
 
