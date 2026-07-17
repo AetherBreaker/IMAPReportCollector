@@ -1,4 +1,13 @@
 services:
+  init:
+    image: busybox
+    volumes:
+      - type: bind
+        source: /data/imap_report_collector_files
+        target: /app/persisted_data
+    command: chown -R 999:999 /app/persisted_data
+    user: root
+
   imap-report-collector:
     container_name: imap-report-collector
     build:
