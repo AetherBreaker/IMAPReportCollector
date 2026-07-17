@@ -12,7 +12,7 @@ services:
     container_name: imap-report-collector
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
       args:
         GIT_TAG: v0.5.1
         GIT_REPO: https://github.com/AetherBreaker/IMAPReportCollector.git
