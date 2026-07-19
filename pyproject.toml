@@ -1,6 +1,6 @@
 [project]
   name            = "imap-report-collector"
-  version         = "0.5.0"
+  version         = "1.0.0"
   requires-python = ">=3.14"
   dependencies    = [
     "aeth-ext[sftp,async]>=3.3.5",
@@ -49,8 +49,9 @@
       { path = "../aeth_ext", editable = true, marker = "sys_platform == 'win32'" }
     ]
     poe-tasks = [
-      { index = "SFTPyPI", marker = "sys_platform == 'linux'" },
-      { path = "../poe_tasks", editable = true, marker = "sys_platform == 'win32'" },
+      { index = "SFTPyPI" },
+      # , marker = "sys_platform == 'linux'"
+      # { path = "../poe_tasks", editable = true, marker = "sys_platform == 'win32'" },
     ]
 
   [[tool.uv.index]]
