@@ -45,7 +45,7 @@ sftp = [
 
 [[package]]
 name = "aeth-ext"
-version = "4.2.10"
+version = "5.0.0"
 source = { editable = "../aeth_ext" }
 resolution-markers = [
     "python_full_version >= '3.15' and sys_platform == 'win32'",
@@ -60,6 +60,7 @@ dependencies = [
     { name = "rich", marker = "sys_platform == 'win32'" },
     { name = "typer", marker = "sys_platform == 'win32'" },
     { name = "tzdata", marker = "sys_platform == 'win32'" },
+    { name = "watchfiles", marker = "sys_platform == 'win32'" },
 ]
 
 [package.optional-dependencies]
@@ -89,6 +90,7 @@ requires-dist = [
     { name = "tzdata", specifier = ">=2026.2" },
     { name = "uvloop", marker = "sys_platform == 'linux' and extra == 'async'", specifier = ">=0.22.1" },
     { name = "uvloop", marker = "sys_platform == 'linux' and extra == 'logserver'", specifier = ">=0.22.1" },
+    { name = "watchfiles", specifier = ">=1.2.0" },
     { name = "winloop", marker = "sys_platform == 'win32' and extra == 'async'", specifier = ">=0.6.0" },
     { name = "winloop", marker = "sys_platform == 'win32' and extra == 'logserver'", specifier = ">=0.6.0" },
 ]
@@ -148,6 +150,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ee/67/531ea369ba64dcff5ec9c3402f9f51bf748cec26dde048a2f973a4eea7f5/annotated_types-0.7.0.tar.gz", hash = "sha256:aff07c09a53a08bc8cfccb9c85b05f1aa9a2a6f23728d790723543408344ce89", size = 16081, upload-time = "2024-05-20T21:33:25.928Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/78/b6/6307fbef88d9b5ee7421e68d78a9f162e0da4900bc5f5793f6d3d0e34fb8/annotated_types-0.7.0-py3-none-any.whl", hash = "sha256:1f02e8b43a8fbbc3f3e0d4f0f4bfc8131bcb4eebe8849b8e5c773f3a1c582a53", size = 13643, upload-time = "2024-05-20T21:33:24.1Z" },
+]
+
+[[package]]
+name = "anyio"
+version = "4.14.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "idna", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/61/cc/a381afa6efea9f496eff839d4a6a1aed3bfafc7b3ab4b0d1b243a12573dd/anyio-4.14.2.tar.gz", hash = "sha256:cfa139f3ed1a23ee8f88a145ddb5ac7605b8bbfd8592baacd7ce3d8bb4313c7f", size = 260176, upload-time = "2026-07-12T20:29:07.082Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/35/f2287558c17e29fafc8ef3daf819bb9834061cfa43bff8014f7df7f63bdc/anyio-4.14.2-py3-none-any.whl", hash = "sha256:9f505dda5ac9f0c8309b5e8bd445a8c2bf7246f3ce950121e45ea15bc41d1494", size = 125813, upload-time = "2026-07-12T20:29:05.763Z" },
 ]
 
 [[package]]
@@ -440,12 +454,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/c9/91/48a93414f70a973b6070e0477a275b8c9a9cf25eef9269472b27b672d5ca/heartrate-0.2.2.tar.gz", hash = "sha256:a51841684521be6eaaad6ed7f03a3834f40a6492b7c823e9f50efe41ac5aa077", size = 239402, upload-time = "2021-11-13T14:58:19.414Z" }
 
 [[package]]
+name = "idna"
+version = "3.18"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/cd/63/9496c57188a2ee585e0f1db071d75089a11e98aa86eb99d9d7618fc1edce/idna-3.18.tar.gz", hash = "sha256:ffb385a7e039654cef1ab9ef32c6fafe283c0c0467bba1d9029738ce4a14a848", size = 196711, upload-time = "2026-06-02T14:34:07.794Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/1e/5e/d4e9f1a599fb8e573b7b87160658329fbf28d19eac2718f51fc3def3aa5a/idna-3.18-py3-none-any.whl", hash = "sha256:7f952cbe720b688055e3f87de14f5c3e5fdaa8bc3928985c4077ca689de849a2", size = 65455, upload-time = "2026-06-02T14:34:06.319Z" },
+]
+
+[[package]]
 name = "imap-report-collector"
-version = "0.5.1"
+version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aeth-ext", version = "4.2.10", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
-    { name = "aeth-ext", version = "4.2.10", source = { editable = "../aeth_ext" }, extra = ["async", "sftp"], marker = "sys_platform == 'win32'" },
+    { name = "aeth-ext", version = "5.0.0", source = { editable = "../aeth_ext" }, extra = ["async", "sftp"], marker = "sys_platform == 'win32'" },
     { name = "aiologic", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "heartrate", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "imap-tools", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
@@ -456,8 +479,7 @@ dependencies = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "poe-tasks", version = "4.3.6", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, marker = "sys_platform == 'linux'" },
-    { name = "poe-tasks", version = "4.3.6", source = { editable = "../poe_tasks" }, marker = "sys_platform == 'win32'" },
+    { name = "poe-tasks", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "poethepoet", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "pyright", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
@@ -477,9 +499,7 @@ requires-dist = [
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "poe-tasks", marker = "sys_platform != 'linux' and sys_platform != 'win32'", specifier = ">=4.0.0" },
-    { name = "poe-tasks", marker = "sys_platform == 'linux'", specifier = ">=4.0.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
-    { name = "poe-tasks", marker = "sys_platform == 'win32'", editable = "../poe_tasks" },
+    { name = "poe-tasks", specifier = ">=4.0.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
     { name = "poethepoet", specifier = ">=0.46.0" },
     { name = "pyright", specifier = ">=1.1.411" },
 ]
@@ -740,40 +760,14 @@ wheels = [
 name = "poe-tasks"
 version = "4.3.6"
 source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }
-resolution-markers = [
-    "python_full_version >= '3.15' and sys_platform == 'linux'",
-    "python_full_version < '3.15' and sys_platform == 'linux'",
-]
 dependencies = [
-    { name = "poethepoet", marker = "sys_platform == 'linux'" },
-    { name = "poethepoet-tasks", marker = "sys_platform == 'linux'" },
+    { name = "poethepoet", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "poethepoet-tasks", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
 ]
 sdist = { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/b34/abe3215ac0d1b/poe_tasks-4.3.6.tar.gz", hash = "sha256:b34abe3215ac0d1b4ef3a9ca3a1898d8c5b98849354c47f378c6b45904b745c2" }
 wheels = [
     { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/9cd/cd3ec3a88f7c0/poe_tasks-4.3.6-py3-none-any.whl", hash = "sha256:9cdcd3ec3a88f7c0ba7e42c8b185f875986ee4f0001020cd5d1582274730489d" },
 ]
-
-[[package]]
-name = "poe-tasks"
-version = "4.3.6"
-source = { editable = "../poe_tasks" }
-resolution-markers = [
-    "python_full_version >= '3.15' and sys_platform == 'win32'",
-    "python_full_version < '3.15' and sys_platform == 'win32'",
-]
-dependencies = [
-    { name = "poethepoet", marker = "sys_platform == 'win32'" },
-    { name = "poethepoet-tasks", marker = "sys_platform == 'win32'" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "poethepoet", specifier = ">=0.46.0" },
-    { name = "poethepoet-tasks", specifier = ">=0.3.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [{ name = "pyright", specifier = ">=1.1.411" }]
 
 [[package]]
 name = "poethepoet"
@@ -1132,6 +1126,20 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/c1/37/945b4ca0ac27e3dc4952642d4c900edd030b3da6c9634875af6e13ae80e5/uvloop-0.22.1-cp314-cp314t-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b91328c72635f6f9e0282e4a57da7470c7350ab1c9f48546c0f2866205349d21", size = 4467065, upload-time = "2025-10-16T22:16:58.206Z" },
     { url = "https://files.pythonhosted.org/packages/97/cc/48d232f33d60e2e2e0b42f4e73455b146b76ebe216487e862700457fbf3c/uvloop-0.22.1-cp314-cp314t-musllinux_1_2_aarch64.whl", hash = "sha256:daf620c2995d193449393d6c62131b3fbd40a63bf7b307a1527856ace637fe88", size = 4328384, upload-time = "2025-10-16T22:16:59.36Z" },
     { url = "https://files.pythonhosted.org/packages/e4/16/c1fd27e9549f3c4baf1dc9c20c456cd2f822dbf8de9f463824b0c0357e06/uvloop-0.22.1-cp314-cp314t-musllinux_1_2_x86_64.whl", hash = "sha256:6cde23eeda1a25c75b2e07d39970f3374105d5eafbaab2a4482be82f272d5a5e", size = 4296730, upload-time = "2025-10-16T22:17:00.744Z" },
+]
+
+[[package]]
+name = "watchfiles"
+version = "1.2.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "anyio", marker = "sys_platform == 'win32'" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/cd/41/5e1a4bb12aac5f1493fa1bdc11154eca3b258ca4eba65d39c473fe19d8e9/watchfiles-1.2.0.tar.gz", hash = "sha256:c995fba777f1ea992f090f9236e9284cf7a5d1a0130dd5a3d82c598cacd76838", size = 108252, upload-time = "2026-05-18T04:32:04.251Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/21/b1/6cbbb50c1f3002ab568777d44aa21206dfb8807a840990c4037523b51812/watchfiles-1.2.0-cp314-cp314-win32.whl", hash = "sha256:c0db965c5f79aa49fe672d297cf1febc5ad149b658594944f49a54a2b96270a7", size = 275108, upload-time = "2026-05-18T04:30:06.891Z" },
+    { url = "https://files.pythonhosted.org/packages/92/45/190ce6db8dcb4536682cf75d3889ff1a27182a58cb519d343cb6d9ea63d8/watchfiles-1.2.0-cp314-cp314-win_amd64.whl", hash = "sha256:71283b39fd17e5408eb123bd37aeecfd9d54c81fc184421943208aadb879d103", size = 288441, upload-time = "2026-05-18T04:32:12.901Z" },
+    { url = "https://files.pythonhosted.org/packages/74/0d/3eae1c2313ab08378431d907c3f8095ecca00f3eda33111cf4f0f2591799/watchfiles-1.2.0-cp314-cp314-win_arm64.whl", hash = "sha256:c5c19526f4e54a00f2666a6c0e9e40d582c09e865055ea7378bf0009aab857b3", size = 280684, upload-time = "2026-05-18T04:31:26.902Z" },
 ]
 
 [[package]]
