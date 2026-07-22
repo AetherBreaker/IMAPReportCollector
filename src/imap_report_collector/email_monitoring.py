@@ -68,7 +68,9 @@ def _fetch_backlog_emails(mailbox: MailBox, queue: Queue[MailMessage], loop: Abs
     logger.info("  Previously unfound email found with UID: %s, subject: %s. Adding to processing queue.", msg.uid, msg.subject)
     loop.call_soon_threadsafe(queue.put_nowait, msg)
     if msg.uid is not None:
-      logger.info("  Email with UID %s found and added to queue.", msg.uid)
+      flag_as_seen(msg, mailbox)
+
+    logger.info("  Email with UID %s found and added to queue.", msg.uid)
 
 
 def _fetch_new_emails(mailbox: MailBox, queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
