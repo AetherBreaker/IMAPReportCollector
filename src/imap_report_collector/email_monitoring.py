@@ -28,7 +28,6 @@ if TYPE_CHECKING:
   from asyncio import AbstractEventLoop
   from asyncio.queues import Queue
 
-# from imap_tools import UidRange
 
 logger = getLogger(__name__)
 
@@ -52,27 +51,6 @@ def _setup_heartrate_tracing() -> None:
   )
 
 
-def _fetch_backlog_emails(mailbox: MailBox, queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
-  """Fetch and enqueue emails that arrived before the current IDLE session."""
-  mailbox.folder.set("Inbox")
-  logger.info("Attempting to fetch previously unfound emails")
-  for msg in mailbox.fetch(
-    A(
-      # uid=UidRange("3638", "*"),
-      from_="emails@mailing.goftx.com",
-      date_gte=STATIC_DATE_FILTER,
-      text="report contents",
-      no_keyword="AutoMon_Seen",
-    )
-  ):
-    logger.info("  Previously unfound email found with UID: %s, subject: %s. Adding to processing queue.", msg.uid, msg.subject)
-    loop.call_soon_threadsafe(queue.put_nowait, msg)
-    if msg.uid is not None:
-      flag_as_seen(msg, mailbox)
-
-    logger.info("  Email with UID %s found and added to queue.", msg.uid)
-
-
 def _fetch_new_emails(mailbox: MailBox, queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
   """Fetch newly arrived emails triggered by an IMAP IDLE response and enqueue them."""
   logger.info(
@@ -83,6 +61,8 @@ def _fetch_new_emails(mailbox: MailBox, queue: Queue[MailMessage], loop: Abstrac
     "    Does not have keyword: 'AutoMon_Seen'",
     STATIC_DATE_FILTER,
   )
+  logger.info("  Refreshing mailbox")
+  mailbox.folder.set("Inbox")
   for msg in mailbox.fetch(
     A(
       from_="emails@mailing.goftx.com",
@@ -91,50 +71,30 @@ def _fetch_new_emails(mailbox: MailBox, queue: Queue[MailMessage], loop: Abstrac
       no_keyword="AutoMon_Seen",
     ),
   ):
-    # fetch_found = True
     logger.info("    New email found with UID: %s, subject: %s. Adding to processing queue.", msg.uid, msg.subject)
     loop.call_soon_threadsafe(queue.put_nowait, msg)
     if msg.uid is not None:
       flag_as_seen(msg, mailbox)
-      # exists_but_unfound.discard(int(msg.uid))  # Remove from unfound list if it was there, no error if it wasn't
-
-  # if not fetch_found:
-  #   logger.info("  No matching unseen emails found. Will check again on next IDLE response\n")
-  #   exists_but_unfound.add(int(match.group("uid")))
-
-  logger.info("  Finished processing IMAP IDLE response.\n")
 
 
-def _poll_idle_and_process(mailbox: MailBox, queue: Queue[MailMessage], loop: AbstractEventLoop) -> bool:
+def _poll_idle_and_process(mailbox: MailBox, queue: Queue[MailMessage], loop: AbstractEventLoop):
   """Enter IMAP IDLE, wait for a server push, and process the response. Returns True if the outer loop should break."""
   logger.info("Entering IMAP IDLE mode to wait for new emails...")
   with mailbox.idle as idle:
     logger.info("Polling for new emails...")
     responses = idle.poll(SETTINGS.watch_polling_timeout_sec)
 
-  if FATAL_EVENT.is_set():
-    return False
-
   if not responses:
     logger.info("no updates in %s sec", SETTINGS.watch_polling_timeout_sec)
-    return True
 
-  logger.info("  IMAP IDLE response received: %s. Refreshing mailbox", responses)
-  mailbox.folder.set("Inbox")
+  logger.info("  IMAP IDLE response received: %s", responses)
 
   match_result = RESPONSE_UID_PATTERN.match(responses[0].decode())
   if match_result is None:
     logger.error("  Received IMAP response did not match expected pattern: %s.", responses[0].decode())
-    return True
 
   _fetch_new_emails(mailbox, queue, loop)
-  return True
-
-
-def _run_mailbox_session(mailbox: MailBox, queue: Queue[MailMessage], loop: AbstractEventLoop) -> bool:
-  """Execute a single connected mailbox session: backlog fetch then one IDLE poll cycle. Returns False if an exception was raised that necessitates breaking the outer loop."""
-  _fetch_backlog_emails(mailbox, queue, loop)
-  return _poll_idle_and_process(mailbox, queue, loop)
+  logger.info("  Finished processing IMAP IDLE response.\n")
 
 
 @handle_fatal_exc_sync
@@ -160,7 +120,13 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
         port=SETTINGS.watch_imap_port,
         ssl_context=ssl_context,
       ).login(SETTINGS.watch_email, SETTINGS.watch_email_pwd, "Inbox") as mailbox:
-        not_broken = not _run_mailbox_session(mailbox, queue, loop)
+        logger.info("Attempting to fetch previously unfound emails")
+        _fetch_new_emails(mailbox, queue, loop)
+        _poll_idle_and_process(mailbox, queue, loop)
+
+      if FATAL_EVENT.is_set():
+        logger.info("Fatal event detected. Exiting IMAP email monitoring loop.")
+        not_broken = False
 
     except ConnectionRefusedError as e:
       logger.warning("Connection refused error occurred: %s. Will attempt to reconnect.", e)
@@ -179,5 +145,4 @@ def flag_as_seen(msg: MailMessage, mailbox: MailBox):
   assert msg.uid is not None, "This is impossible."
   logger.info("    Flagging %s as seen", msg.uid)
   mailbox.flag(msg.uid, "AutoMon_Seen", value=True)
-  # mailbox.flag(msg.uid, MailMessageFlags.SEEN, True)
   logger.info("    %s flagged as seen", msg.uid)
