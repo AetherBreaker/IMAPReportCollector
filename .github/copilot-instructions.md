@@ -6,7 +6,7 @@ When generating Git commit messages, always follow the Conventional Commits spec
 Use format: <type>(<scope>): <short summary>
 Types must be: feat, fix, docs, style, refactor, perf, test, or chore.
 Use the affected module or package name as the scope (e.g., `types`, `protocol`). Omit the scope only when the change is truly project-wide.
-When the type is "fix", the body should clearly explain the problem
+When the type is "fix", the body must describe: (1) what the bug was, (2) what caused it, and (3) how this commit fixes it.
 
 ## Pydantic Dataclass Conventions
 
