@@ -84,17 +84,17 @@ def _poll_idle_and_process(mailbox: MailBox, queue: Queue[MailMessage], loop: Ab
     logger.info("Polling for new emails...")
     responses = idle.poll(SETTINGS.watch_polling_timeout_sec)
 
-  if not responses:
+  if responses:
+    logger.info("  IMAP IDLE response received: %s", responses)
+
+    match_result = RESPONSE_UID_PATTERN.match(responses[0].decode())
+    if match_result is None:
+      logger.error("  Received IMAP response did not match expected pattern: %s.", responses[0].decode())
+
+    _fetch_new_emails(mailbox, queue, loop)
+    logger.info("  Finished processing IMAP IDLE response.\n")
+  else:
     logger.info("no updates in %s sec", SETTINGS.watch_polling_timeout_sec)
-
-  logger.info("  IMAP IDLE response received: %s", responses)
-
-  match_result = RESPONSE_UID_PATTERN.match(responses[0].decode())
-  if match_result is None:
-    logger.error("  Received IMAP response did not match expected pattern: %s.", responses[0].decode())
-
-  _fetch_new_emails(mailbox, queue, loop)
-  logger.info("  Finished processing IMAP IDLE response.\n")
 
 
 @handle_fatal_exc_sync
