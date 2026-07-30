@@ -140,6 +140,9 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
         raise e
       logger.warning("Socket error occurred (likely due to server closing connection): %s. Will attempt to reconnect.", e)
 
+    except Exception as e:
+      raise RuntimeError(f"Unexpected error type occurred during IMAP email monitoring: {type(e)}") from e
+
 
 def flag_as_seen(msg: MailMessage, mailbox: MailBox):
   assert msg.uid is not None, "This is impossible."
