@@ -14,7 +14,7 @@ RICH_CONSOLE = Console(
 )
 PROJECT_NAME = "imap-report-collector"
 LOGGING_TYPE = "daily"
-TESTING = True
+# TESTING = True
 
 initialize(asyncio=True, logging="socket")
 
