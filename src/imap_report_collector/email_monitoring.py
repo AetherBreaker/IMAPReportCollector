@@ -137,10 +137,11 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
     except socket_error as e:
       if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:  # pyright: ignore[reportUnnecessaryIsInstance]
         # reraise otherwise
-        raise e
+        raise
       logger.warning("Socket error occurred (likely due to server closing connection): %s. Will attempt to reconnect.", e)
 
     except Exception as e:
+      logger.exception("Unexpected error occurred during IMAP email monitoring")
       raise RuntimeError(f"Unexpected error type occurred during IMAP email monitoring: {type(e)}") from e
 
 
