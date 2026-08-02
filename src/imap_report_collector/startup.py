@@ -1,7 +1,8 @@
 # Standard library imports
 import sys
-from asyncio import Queue, create_task, get_running_loop, run
+from asyncio import CancelledError, Queue, create_task, get_running_loop, run
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import suppress
 from logging import getLogger
 from threading import Thread
 from typing import TYPE_CHECKING, NoReturn
@@ -90,6 +91,8 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   email_processing_task.cancel()
 
   periodic_heartbeat_task.cancel()
+  with suppress(CancelledError):
+    await periodic_heartbeat_task
 
   if SETTINGS.realtime_monitor:
     executor.shutdown(wait=True)  # pyright: ignore[reportPossiblyUnboundVariable]
