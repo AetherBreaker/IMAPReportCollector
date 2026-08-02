@@ -3,7 +3,7 @@
   version         = "1.1.7"
   requires-python = ">=3.14"
   dependencies    = [
-    "aeth-ext[sftp,async]>=3.3.5",
+    "aeth-ext[sftp,async]>=6.2.1",
     "aiologic>=0.16.0",
     "heartrate>=0.2.2",
     "imap-tools>=1.11.1",

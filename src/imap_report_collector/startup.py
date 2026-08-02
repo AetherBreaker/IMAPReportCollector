@@ -1,8 +1,7 @@
 # Standard library imports
 import sys
-from asyncio import Queue, create_task, get_running_loop, run, sleep
+from asyncio import Queue, create_task, get_running_loop, run
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 from logging import getLogger
 from threading import Thread
 from typing import TYPE_CHECKING, NoReturn
@@ -11,46 +10,20 @@ from typing import TYPE_CHECKING, NoReturn
 from rich import get_console
 
 # First party imports
-from aeth_ext.errors import FATAL_EVENT, handle_fatal_exc_async
+from aeth_ext.errors import FATAL_EVENT
+from aeth_ext.monitoring import run_heartbeat_async
 from imap_report_collector.email_monitoring import start_imap_email_monitoring
 from imap_report_collector.email_processing import direct_email_processing
 from imap_report_collector.environment_init_vars import SETTINGS
 
 if TYPE_CHECKING:
-  # Standard library imports
-  from collections.abc import Callable
-
   # Third party imports
   from imap_tools import MailMessage
 
 logger = getLogger(__name__)
 RICH_CONSOLE = get_console()
 
-if not __debug__:
-  # Heartbeat file for health checks
-  HEARTBEAT_FILE = SETTINGS.log_loc_folder / "heartbeat.txt"
-
-  def write_heartbeat():
-    """Write current timestamp to heartbeat file for health monitoring."""
-    try:
-      HEARTBEAT_FILE.write_text(datetime.now(SETTINGS.tz).isoformat())
-    except Exception as e:
-      logger.error("Failed to write heartbeat: %s", e)
-else:
-
-  def write_heartbeat():
-    pass
-
-
-@handle_fatal_exc_async
-async def run_periodic(interval: float, func: Callable[[], None]) -> NoReturn:
-  """Run a function periodically at a specified interval."""
-  while True:
-    try:
-      func()
-    except Exception as e:
-      logger.error("Error in periodic task: %s", e)
-    await sleep(interval)
+HEARTBEAT_FILE = SETTINGS.log_loc_folder / "heartbeat.txt"
 
 
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
@@ -82,13 +55,18 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
     loop.set_default_executor(executor)
 
   RICH_CONSOLE.rule("[bold red]Booting...[/]", style="bold red")
-  # Write initial heartbeat on startup
-  write_heartbeat()
 
   emails_to_process_queue: Queue[MailMessage] = Queue()
 
   # async with TaskGroup() as main_tasks:
-  periodic_heartbeat_task = create_task(run_periodic(30, write_heartbeat))
+  periodic_heartbeat_task = create_task(
+    run_heartbeat_async(
+      HEARTBEAT_FILE,
+      ping_url=SETTINGS.alerts_healthcheck_ping_url,
+      pingkey=SETTINGS.alerts_healthcheck_pingkey,
+      tz=SETTINGS.tz,
+    )
+  )
   email_processing_task = create_task(direct_email_processing(emails_to_process_queue))
 
   email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue, get_running_loop()), daemon=True)

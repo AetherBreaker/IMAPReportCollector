@@ -13,6 +13,7 @@ RICH_CONSOLE = Console(
   log_time=platform == "win32",
 )
 PROJECT_NAME = "imap-report-collector"
+HEARTBEAT_SLUG = "imap-report-collector"
 LOGGING_TYPE = "daily"
 # TESTING = True
 
