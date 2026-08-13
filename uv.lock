@@ -491,7 +491,7 @@ wheels = [
 
 [[package]]
 name = "imap-report-collector"
-version = "1.2.3"
+version = "2.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "aeth-ext", version = "7.0.0", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
