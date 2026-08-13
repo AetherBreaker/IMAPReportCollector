@@ -99,7 +99,9 @@ async def _shutdown_app_tasks(
     with suppress(CancelledError):
       await periodic_heartbeat_task
 
-    if executor is not None:
+    if executor is None:
+      await get_running_loop().shutdown_default_executor()
+    else:
       executor.shutdown(wait=True)
 
 
