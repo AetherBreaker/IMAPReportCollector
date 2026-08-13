@@ -14,7 +14,8 @@ from re import Pattern, compile
 from typing import TYPE_CHECKING
 
 # First party imports
-from aeth_ext.errors.err_handling import FATAL_EVENT, handle_fatal_exc_async
+from aeth_ext.errors.err_handling import handle_fatal_exc_async
+from aeth_ext.errors.shutdown import SHUTDOWN
 from aeth_ext.ftp.adapter import AdaptedSFTP, FTPAdapter
 from aeth_ext.ftp.errors import ServerNotAvailableError
 
@@ -35,8 +36,8 @@ async def direct_email_processing(queue: Queue[MailMessage]):
   loop = get_running_loop()
   async with TaskGroup() as subtasks:
     while True:
-      if FATAL_EVENT.is_set():
-        logger.error("Fatal event detected. Stopping email processing.")
+      if SHUTDOWN.is_set():
+        logger.error("Shutdown signal detected. Stopping email processing.")
         break
       logger.info("Waiting for emails to be added to queue...")
       email_data = await queue.get()
