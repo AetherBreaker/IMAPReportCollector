@@ -6,9 +6,11 @@ from pathlib import Path
 from typing import Annotated
 
 # Third party imports
-from aeth_ext.settings import BaseSettings
 from pydantic import Field
 from pydantic_settings import SettingsConfigDict
+
+# First party imports
+from aeth_ext.settings import BaseSettings
 
 logger = getLogger(__name__)
 
@@ -36,6 +38,14 @@ class Settings(BaseSettings):
   watch_email_pwd: Annotated[str, Field(alias="WATCH_EMAIL_PWD")]
 
   watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 10
+
+  # Kept short (well under aeth_ext's 7s GRACEFUL shutdown budget) so a stalled login/fetch
+  # resolves in time for the monitoring thread to notice shutdown and exit cleanly, rather than
+  # holding the shutdown sequence's thread-join hostage. A single short timeout is tolerated
+  # without complaint -- see watch_max_consecutive_timeouts -- so this isn't a false-positive risk
+  # on an otherwise healthy but momentarily slow connection.
+  watch_socket_timeout_sec: Annotated[float, Field(alias="WATCH_SOCKET_TIMEOUT_SEC")] = 5
+  watch_max_consecutive_timeouts: Annotated[int, Field(alias="WATCH_MAX_CONSECUTIVE_TIMEOUTS")] = 5
 
   realtime_monitor: Annotated[bool, Field(alias="REALTIME_MONITOR")] = False
 
