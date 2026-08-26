@@ -17,8 +17,8 @@ HEARTBEAT_SLUG = "imap-report-collector"
 LOGGING_TYPE = "daily"
 # TESTING = True
 
-initialize(asyncio=True, logging=True)
-# initialize(asyncio=True, logging="socket")
+# initialize(asyncio=True, logging=True)
+initialize(asyncio=True, logging="socket")
 
 
 def run_app() -> None:
