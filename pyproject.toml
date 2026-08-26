@@ -3,7 +3,7 @@
   version         = "2.0.1"
   requires-python = ">=3.14"
   dependencies    = [
-    "aeth-ext[sftp,async]>=7.0.0",
+    "aeth-ext[sftp,async]>=8.0.2",
     "aiologic>=0.16.0",
     "heartrate>=0.2.2",
     "imap-tools>=1.11.1",
@@ -48,7 +48,13 @@
   extends = "../pyproject.toml"
 
 [tool.pytest.ini_options]
-  addopts      = ["--cov", "--cov-report=term-missing", "--strict-markers", "--strict-config", "-ra"]
+  addopts      = [
+    "--cov",
+    "--cov-report=term-missing",
+    "--strict-markers",
+    "--strict-config",
+    "-ra"
+  ]
   cache_dir    = ".cache/pytest"
   testpaths    = ["tests"]
   xfail_strict = true
