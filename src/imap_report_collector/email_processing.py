@@ -8,20 +8,24 @@ if __name__ == "__main__":
 # Standard library imports
 from asyncio import AbstractEventLoop, Queue, TaskGroup, get_running_loop, to_thread
 from io import BytesIO
+from json import loads
 from logging import getLogger
 from pathlib import PurePosixPath
 from re import Pattern, compile
 from typing import TYPE_CHECKING
 
+# Third party imports
+from pydantic import SecretStr
+
 # First party imports
 from aeth_ext.errors.err_handling import handle_fatal_exc_async
 from aeth_ext.errors.shutdown import SHUTDOWN
-from aeth_ext.ftp.adapter import AdaptedSFTP, FTPAdapter
+from aeth_ext.ftp import create_ftp_adapter
+from aeth_ext.ftp.credentials import SFTPCredentials
 from aeth_ext.ftp.errors import ServerNotAvailableError
 
 # Local folder imports
 from .environment_init_vars import SETTINGS
-from .ftp_configs import SFTSFTPClient
 
 if TYPE_CHECKING:
   # Third party imports
@@ -54,7 +58,25 @@ SUBJECT_PATTERN: Pattern[str] = compile(
   r"\d{1,2}, \d{4} \d{1,2}:\d{2} (AM|PM))$"
 )
 
-SWEETFIRE_SFTP: FTPAdapter[AdaptedSFTP] = FTPAdapter(SFTSFTPClient, container_cls="", tzinfo=SETTINGS.tz)
+# Keep the parsed plaintext only while constructing the redacting credentials object -- the
+# password lives on as a `SecretStr` (rendered as `**********` by repr/str/logging) and is only
+# unwrapped by aeth_ext at the paramiko connect call.
+_raw = loads(SETTINGS.sft_website_creds_file.read_text())
+try:
+  SWEETFIRE_SFTP = create_ftp_adapter(
+    SFTPCredentials(
+      host=_raw["HOSTNAME"],
+      username=_raw["USER"],
+      password=SecretStr(_raw["PWD"]),
+      port=int(_raw.get("PORT", 22)),
+      host_key_policy="auto_add",
+    ),
+    container_cls="SweetfireSFTP",
+    tzinfo=SETTINGS.tz,
+  )
+finally:
+  del _raw
+
 BASE_DIR = PurePosixPath("/upload")
 
 

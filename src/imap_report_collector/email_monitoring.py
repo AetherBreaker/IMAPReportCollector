@@ -134,7 +134,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
         port=SETTINGS.watch_imap_port,
         ssl_context=ssl_context,
         timeout=SETTINGS.watch_socket_timeout_sec,
-      ).login(SETTINGS.watch_email, SETTINGS.watch_email_pwd, "Inbox") as mailbox:
+      ).login(SETTINGS.watch_email, SETTINGS.watch_email_pwd.get_secret_value(), "Inbox") as mailbox:
         logger.info("Attempting to fetch previously unfound emails")
         _fetch_new_emails(mailbox, queue, loop)
         _poll_idle_and_process(mailbox, queue, loop)

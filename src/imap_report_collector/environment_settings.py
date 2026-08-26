@@ -1,41 +1,28 @@
 # Standard library imports
-import sys
 from logging import getLogger
 from os import environ
-from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 # Third party imports
-from pydantic import Field
-from pydantic_settings import SettingsConfigDict
+from pydantic import Field, SecretStr
 
 # First party imports
 from aeth_ext.settings import BaseSettings
+
+if TYPE_CHECKING:
+  # Standard library imports
+  from pathlib import Path
 
 logger = getLogger(__name__)
 
 environ.setdefault("PYDANTIC_ERRORS_INCLUDE_URL", "false")
 
 
-CWD = Path(__file__).parent if getattr(sys, "frozen", False) else Path.cwd()
-
-
 class Settings(BaseSettings):
-  model_config = (
-    SettingsConfigDict(
-      env_file=CWD / ".env",
-      env_file_encoding="utf-8",
-      env_ignore_empty=True,
-      extra="ignore",
-    )
-    if __debug__
-    else SettingsConfigDict()
-  )
-
   watch_imap_server: Annotated[str, Field(alias="WATCH_IMAP_SERVER")] = "imappro.zoho.com"
   watch_imap_port: Annotated[int, Field(alias="WATCH_IMAP_PORT")] = 993
   watch_email: Annotated[str, Field(alias="WATCH_EMAIL")] = "info@sweetfiretobacco.com"
-  watch_email_pwd: Annotated[str, Field(alias="WATCH_EMAIL_PWD")]
+  watch_email_pwd: Annotated[SecretStr, Field(alias="WATCH_EMAIL_PWD")]
 
   watch_polling_timeout_sec: Annotated[int, Field(alias="WATCH_POLLING_TIMEOUT_SEC")] = 10
 

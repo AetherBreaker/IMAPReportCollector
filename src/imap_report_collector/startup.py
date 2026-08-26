@@ -24,6 +24,9 @@ if TYPE_CHECKING:
   # Third party imports
   from imap_tools import MailMessage
 
+  # First party imports
+  from aeth_ext.errors.exception_trail import ExceptionTrail
+
 logger = getLogger(__name__)
 RICH_CONSOLE = get_console()
 
@@ -152,7 +155,7 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
   email_monitoring_thread = Thread(target=start_imap_email_monitoring, args=(emails_to_process_queue, loop), daemon=True)
   email_monitoring_thread.start()
 
-  def _finish_email_monitoring_shutdown() -> None:
+  def _finish_email_monitoring_shutdown(trails: tuple[ExceptionTrail, ...]) -> None:
     """Wait for the IMAP monitoring thread to exit its connection (D-I2 threaded phase).
 
     Registered rather than joined inline in ``main()`` so it is bounded and
@@ -171,7 +174,7 @@ async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
 
   shutdown_task = create_task(_shutdown_app_tasks(emails_to_process_queue, email_processing_task, periodic_heartbeat_task, executor))
 
-  def _finish_app_tasks_shutdown() -> None:
+  def _finish_app_tasks_shutdown(trails: tuple[ExceptionTrail, ...]) -> None:
     """Block the threaded shutdown pass on ``_shutdown_app_tasks`` (D-I2 threaded phase).
 
     ``run_coroutine_threadsafe`` schedules the wait onto the loop from this
