@@ -481,7 +481,7 @@ wheels = [
 
 [[package]]
 name = "imap-report-collector"
-version = "3.0.3"
+version = "3.0.4"
 source = { editable = "." }
 dependencies = [
     { name = "aeth-ext", version = "8.0.6", source = { editable = "../aeth_ext" }, extra = ["async", "sftp"], marker = "sys_platform == 'win32'" },
