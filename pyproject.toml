@@ -33,10 +33,7 @@
 
 [tool.coverage.run]
   data_file   = ".cache/.coverage"
-  source_pkgs = [
-    "scheduled_invoice_processor",
-    "imap_report_collector"
-  ]                                                                       # setup-project added: "imap_report_collector"
+  source_pkgs = ["scheduled_invoice_processor", "imap_report_collector"]  # setup-project added: "imap_report_collector"
 
 [tool.coverage.report]
   show_missing = true
@@ -59,9 +56,7 @@
   mkdirs      = [""]
 
 [tool.poe]
-  include_script = [
-    { script = "aeth_devkit:tasks", executor = { type = "uv", frozen = true } }
-  ]
+  include_script = [{ script = "aeth_devkit:tasks", executor = { type = "uv", frozen = true } }]
 
 [tool.pyright]
   typeCheckingMode = "standard"
@@ -100,13 +95,7 @@
   executionEnvironments = [{ root = "src", extraPaths = ["src"] }]
 
 [tool.pytest.ini_options]
-  addopts      = [
-    "--cov",
-    "--cov-report=term-missing",
-    "--strict-markers",
-    "--strict-config",
-    "-ra"
-  ]
+  addopts      = ["--cov", "--cov-report=term-missing", "--strict-markers", "--strict-config", "-ra"]
   cache_dir    = ".cache/pytest"
   testpaths    = ["tests"]
   xfail_strict = true
@@ -115,11 +104,7 @@
 [tool.ruff]
   cache-dir = ".cache/ruff"
 
-  src = [
-    "./src",
-    "../*/src",
-    "../*/python"
-  ]                                           # setup-project added: "../*/src", "../*/python"
+  src = ["./src", "../*/src", "../*/python"]  # setup-project added: "../*/src", "../*/python"
 
   exclude = [
     ".bzr",
@@ -203,6 +188,12 @@
 
     [tool.ruff.lint.pydocstyle]
       convention = "google"
+
+    [tool.ruff.lint.per-file-ignores]
+      # No missing-docstring rules in tests: a test's name is its summary, and test docstrings
+      # read to agents as statements of intent that were never reviewed. D2xx+ still apply to
+      # docstrings a test does have.
+      "tests/**" = ["D1"]
 
 [tool.tombi]
   toml-version = "v1.1.0"
