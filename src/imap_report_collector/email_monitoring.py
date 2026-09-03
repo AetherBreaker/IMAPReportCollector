@@ -121,10 +121,12 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
 
   ssl_context = create_default_context()
 
-  not_broken = True
   consecutive_timeouts = 0
 
-  while not_broken:
+  # Re-checked after every outcome (success or a retried transient error), not just a clean
+  # cycle -- otherwise a caught timeout/refusal would loop straight back into another connection
+  # attempt instead of noticing shutdown, defeating the point of bounding the socket calls below.
+  while not SHUTDOWN.is_set():
     logger.info("Emails currently in processing queue: %s", queue.qsize())
     sleep(0)  # Yield control to allow the main thread to run
 
@@ -172,12 +174,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
       logger.exception("Unexpected error occurred during IMAP email monitoring")
       raise RuntimeError(f"Unexpected error type occurred during IMAP email monitoring: {type(e)}") from e
 
-    # Checked after every outcome above (success or a retried transient error), not just a clean
-    # cycle -- otherwise a caught timeout/refusal would loop straight back into another connection
-    # attempt instead of noticing shutdown, defeating the point of bounding the socket calls below.
-    if SHUTDOWN.is_set():
-      logger.info("Shutdown signal detected. Exiting IMAP email monitoring loop.")
-      not_broken = False
+  logger.info("Shutdown signal detected. Exiting IMAP email monitoring loop.")
 
 
 def flag_as_seen(msg: MailMessage, mailbox: MailBox):
