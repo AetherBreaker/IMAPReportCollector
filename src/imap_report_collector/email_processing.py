@@ -1,3 +1,5 @@
+"""Async consumer of the email queue: each message is processed off-thread and its report uploaded over SFTP."""
+
 # heartrate
 if __name__ == "__main__":
   # First party imports

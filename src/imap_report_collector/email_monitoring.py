@@ -1,3 +1,5 @@
+"""IMAP IDLE monitoring thread: fetches matching report emails and hands them to the asyncio queue."""
+
 # heartrate
 if __name__ == "__main__":
   # First party imports
@@ -112,7 +114,7 @@ def _poll_idle_and_process(mailbox: MailBox, queue: Queue[MailMessage], loop: Ab
 
 @handle_fatal_exc_sync
 def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLoop) -> None:
-  """Start the IMAP email monitoring. Runs in a separate thread"""
+  """Start the IMAP email monitoring. Runs in a separate thread."""
   # waiting for updates 60 sec, print unseen immediately if any update
   if SETTINGS.realtime_monitor:
     _setup_heartrate_tracing()
@@ -179,6 +181,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
 
 
 def flag_as_seen(msg: MailMessage, mailbox: MailBox):
+  """Set the `AutoMon_Seen` keyword so later fetches exclude the message."""
   assert msg.uid is not None, "This is impossible."
   logger.info("    Flagging %s as seen", msg.uid)
   mailbox.flag(msg.uid, "AutoMon_Seen", value=True)

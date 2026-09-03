@@ -1,3 +1,5 @@
+"""Application lifecycle: boots the heartbeat, the email-processing task and the IMAP monitoring thread, and wires their shutdown."""
+
 # Standard library imports
 import sys
 from asyncio import CancelledError, Queue, create_task, get_running_loop, run, run_coroutine_threadsafe
@@ -109,7 +111,10 @@ async def _shutdown_app_tasks(
 
 
 async def main() -> NoReturn:  # sourcery skip: remove-empty-nested-block
+  """Boot the heartbeat, processing task and monitoring thread, then block on the shutdown task.
 
+  Ends in `sys.exit(1)`: reaching the end means shutdown was requested, never a normal completion.
+  """
   loop = get_running_loop()
 
   executor: ThreadPoolExecutor | None = None

@@ -1,3 +1,5 @@
+"""Entry point: initializes aeth_ext, then runs the application loop."""
+
 # Standard library imports
 from asyncio import run
 from sys import platform
