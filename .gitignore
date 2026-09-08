@@ -242,5 +242,5 @@ celerybeat-schedule
 secrets/**
 logs/**
 attachments_dl/**
-*.json
 PYCACHE/
+persisted_data/
