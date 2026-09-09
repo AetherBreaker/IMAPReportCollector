@@ -436,6 +436,16 @@ wheels = [
 ]
 
 [[package]]
+name = "devkit-container"
+version = "1.0.0"
+source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }
+sdist = { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/a74/516537fdbbc2e/devkit_container-1.0.0.tar.gz", hash = "sha256:a74516537fdbbc2e0dc50ac3a1b6303c94a9ebbd87ed7c7ca509f6fc52f7a7fd" }
+wheels = [
+    { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/049/726c5396a847b/devkit_container-1.0.0-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:049726c5396a847b32852f2e140510bcae799d9ddd34ad6ed7aa82008d7fc93a" },
+    { url = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+f/457/4fa0831f8d452/devkit_container-1.0.0-py3-none-win_amd64.whl", hash = "sha256:4574fa0831f8d45267d4b15f065796f081714978e6332d20a3246d5d88df5a6c" },
+]
+
+[[package]]
 name = "executing"
 version = "2.2.1"
 source = { registry = "https://pypi.org/simple" }
@@ -490,6 +500,7 @@ dependencies = [
     { name = "aeth-ext", version = "8.0.8", source = { editable = "../aeth_ext" }, extra = ["async", "sftp"], marker = "sys_platform == 'win32'" },
     { name = "aeth-ext", version = "9.0.1", source = { registry = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" }, extra = ["async", "sftp"], marker = "sys_platform == 'linux'" },
     { name = "aiologic", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
+    { name = "devkit-container", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "heartrate", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "imap-tools", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
     { name = "pydantic-settings", marker = "sys_platform == 'linux' or sys_platform == 'win32'" },
@@ -515,6 +526,7 @@ requires-dist = [
     { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform == 'linux'", specifier = ">=8.0.8", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
     { name = "aeth-ext", extras = ["sftp", "async"], marker = "sys_platform == 'win32'", editable = "../aeth_ext" },
     { name = "aiologic", specifier = ">=0.16.0" },
+    { name = "devkit-container", specifier = ">=1.0.0", index = "https://pypi.sweetfiretobacco.com/jacob.ogden/internal/+simple" },
     { name = "heartrate", specifier = ">=0.2.2" },
     { name = "imap-tools", specifier = ">=1.11.1" },
     { name = "pydantic-settings", specifier = ">=2.14.1" },

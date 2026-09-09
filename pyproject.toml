@@ -5,12 +5,13 @@
   dependencies    = [
     "aeth-ext[sftp, async]>=8.0.8",
     "aiologic>=0.16.0",
+    "devkit-container>=1.0.0",
     "heartrate>=0.2.2",
     "imap-tools>=1.11.1",
     "pydantic-settings>=2.14.1",
     "rich>=15.0.0",
     "tzdata>=2026.1",
-  ]
+  ]                                          # setup-project added: "devkit-container"
 
   [project.scripts]
     run-app-imap-report-collector = "imap_report_collector.__main__:run_app"
@@ -237,15 +238,16 @@
   ]
 
   [tool.uv.sources]
-    aeth-ext    = [
+    aeth-ext         = [
       { index = "SFTPyPI", marker = "sys_platform == 'linux'" },
       { path = "../aeth_ext", editable = true, marker = "sys_platform == 'win32'" },
     ]
-    aeth-devkit = [
+    aeth-devkit      = [
       { index = "SFTPyPI" },
       # , marker = "sys_platform == 'linux'"
       # { path = "../aeth-devkit", editable = true, marker = "sys_platform == 'win32'" },
     ]
+    devkit-container = [{ index = "SFTPyPI" }]
 
   [[tool.uv.index]]
     name        = "SFTPyPI"
