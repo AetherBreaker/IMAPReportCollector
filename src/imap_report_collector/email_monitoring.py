@@ -13,7 +13,7 @@ from datetime import date
 from imaplib import IMAP4
 from logging import getLogger
 from re import compile
-from ssl import create_default_context, socket_error
+from ssl import create_default_context
 from time import sleep
 from typing import TYPE_CHECKING
 
@@ -37,6 +37,10 @@ logger = getLogger(__name__)
 
 
 STATIC_DATE_FILTER = date(2026, 4, 8)  # Only process emails from this date onward to avoid old backlog
+
+# Reconnect delay after the Nth consecutive timeout: doubles from the initial value, capped.
+TIMEOUT_BACKOFF_INITIAL_SECS = 5
+TIMEOUT_BACKOFF_MAX_SECS = 300
 
 
 RESPONSE_UID_PATTERN = compile(r"^\* (?P<uid>\d+) (?P<resp>[A-Z]+).*$")
@@ -141,9 +145,8 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
       ).login(SETTINGS.watch_email, SETTINGS.watch_email_pwd.get_secret_value(), "Inbox") as mailbox:
         logger.info("Attempting to fetch previously unfound emails")
         _fetch_new_emails(mailbox, queue, loop)
+        consecutive_timeouts = 0  # Login and fetch both answered, so the server is responsive again.
         _poll_idle_and_process(mailbox, queue, loop)
-
-      consecutive_timeouts = 0  # A full connect/fetch/idle cycle completed, so the server is responsive again.
 
     except ConnectionRefusedError as e:
       logger.warning("Connection refused error occurred: %s. Will attempt to reconnect.", e)
@@ -152,23 +155,19 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
       logger.warning("IMAP4 abort error occurred: %s. Will attempt to reconnect.", e)
 
     except TimeoutError as e:
+      # Within this block a TimeoutError can only be the IMAP socket's own timeout, i.e. the server
+      # not answering: an outage to wait out, not a fault, so it never tears the process down.
       consecutive_timeouts += 1
-      if consecutive_timeouts >= SETTINGS.watch_max_consecutive_timeouts:
-        raise RuntimeError(
-          f"IMAP server unresponsive: {consecutive_timeouts} consecutive timeouts (limit {SETTINGS.watch_max_consecutive_timeouts})."
-        ) from e
+      retry_in = min(TIMEOUT_BACKOFF_INITIAL_SECS * 2 ** (consecutive_timeouts - 1), TIMEOUT_BACKOFF_MAX_SECS)
+      if consecutive_timeouts == SETTINGS.watch_max_consecutive_timeouts:
+        logger.error("IMAP server unresponsive: %s consecutive timeouts. Retrying until it answers.", consecutive_timeouts)
       logger.warning(
-        "Timeout communicating with IMAP server (%s/%s consecutive): %s. Will attempt to reconnect.",
+        "Timeout communicating with IMAP server (%s consecutive): %s. Reconnecting in %s s.",
         consecutive_timeouts,
-        SETTINGS.watch_max_consecutive_timeouts,
         e,
+        retry_in,
       )
-
-    except socket_error as e:
-      if not isinstance(e.args, tuple) or len(e.args) <= 0 or not isinstance(e.args[0], str) or "EOF" not in e.args[0]:  # pyright: ignore[reportUnnecessaryIsInstance]
-        # reraise otherwise
-        raise
-      logger.warning("Socket error occurred (likely due to server closing connection): %s. Will attempt to reconnect.", e)
+      SHUTDOWN.wait(timeout=retry_in)  # Wakes at once on shutdown; the loop condition then exits.
 
     except Exception as e:
       logger.exception("Unexpected error occurred during IMAP email monitoring")

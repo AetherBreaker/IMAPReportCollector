@@ -32,10 +32,10 @@ class Settings(BaseSettings):
 
   # Kept short (well under aeth_ext's 7s GRACEFUL shutdown budget) so a stalled login/fetch
   # resolves in time for the monitoring thread to notice shutdown and exit cleanly, rather than
-  # holding the shutdown sequence's thread-join hostage. A single short timeout is tolerated
-  # without complaint -- see watch_max_consecutive_timeouts -- so this isn't a false-positive risk
-  # on an otherwise healthy but momentarily slow connection.
+  # holding the shutdown sequence's thread-join hostage. A timeout only costs a backed-off
+  # reconnect, so this isn't a false-positive risk on a healthy but momentarily slow connection.
   watch_socket_timeout_sec: Annotated[float, Field(alias="WATCH_SOCKET_TIMEOUT_SEC")] = 5
+  # Consecutive timeouts after which the outage is logged at ERROR; reconnecting continues regardless.
   watch_max_consecutive_timeouts: Annotated[int, Field(alias="WATCH_MAX_CONSECUTIVE_TIMEOUTS")] = 5
 
   realtime_monitor: Annotated[bool, Field(alias="REALTIME_MONITOR")] = False
