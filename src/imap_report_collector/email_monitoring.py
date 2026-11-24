@@ -23,6 +23,7 @@ from imap_tools import A, MailBox, MailMessage
 # First party imports
 from aeth_ext.errors import handle_fatal_exc_sync
 from aeth_ext.errors.shutdown import SHUTDOWN, SHUTDOWN_WAKEUP
+from aeth_ext.monitoring import declare_health_check, send_health_check
 
 # Local folder imports
 from .environment_init_vars import SETTINGS
@@ -41,6 +42,10 @@ STATIC_DATE_FILTER = date(2026, 4, 8)  # Only process emails from this date onwa
 # Reconnect delay after the Nth consecutive timeout: doubles from the initial value, capped.
 TIMEOUT_BACKOFF_INITIAL_SECS = 5
 TIMEOUT_BACKOFF_MAX_SECS = 300
+
+# Pinged once per connect/fetch/IDLE cycle. An outage stops the pings, so the check stalls and only
+# marks the container unhealthy: no healthchecks.io effect, no shutdown.
+declare_health_check("imap", period=SETTINGS.watch_polling_timeout_sec, grace=120, stall_message="IMAP server unresponsive")
 
 
 RESPONSE_UID_PATTERN = compile(r"^\* (?P<uid>\d+) (?P<resp>[A-Z]+).*$")
@@ -146,6 +151,7 @@ def start_imap_email_monitoring(queue: Queue[MailMessage], loop: AbstractEventLo
         logger.info("Attempting to fetch previously unfound emails")
         _fetch_new_emails(mailbox, queue, loop)
         consecutive_timeouts = 0  # Login and fetch both answered, so the server is responsive again.
+        send_health_check("imap")
         _poll_idle_and_process(mailbox, queue, loop)
 
     except ConnectionRefusedError as e:

@@ -3,9 +3,9 @@
   version         = "3.0.9"
   requires-python = ">=3.14"
   dependencies    = [
-    "aeth-ext[sftp, async]>=8.0.8",
+    "aeth-ext[sftp, async]>=10.2.0",
     "aiologic>=0.16.0",
-    "devkit-container>=2.3.1",
+    "devkit-container>=2.4.0",
     "heartrate>=0.2.2",
     "imap-tools>=1.11.1",
     "pydantic-settings>=2.14.1",
@@ -55,19 +55,22 @@
 [tool.docker]
   # Compose services setup-project validates against the standard; the only Docker switch.
   # Empty = no Docker handling. Side services (wireguard, ...) are simply not listed.
-  services                = ["imap-report-collector"]
+  services                   = ["imap-report-collector"]
   # Paths relative to /app the entrypoint guarantees exist, are backed by a bind mount (the
   # path itself or an ancestor) and are owned by nonroot. Sub-paths of a mount are created
   # on the mounted filesystem. Ephemeral scratch dirs do not belong here (or under /app at
   # all): use tempfile paths.
-  required_persisted_dirs = ["persisted_data"]
+  required_persisted_dirs    = ["persisted_data"]
   # The two devkit-container run modes, each added only when missing so a project's own
   # value stands (a plain template scalar would replace it).
   # Spawn and supervise the app instead of exec'ing it.
-  supervise               = true
+  supervise                  = true
   # Bring the tunnel up (the WG_* environment) before the app; implies supervise, and gates
   # the wireguard parts of the Dockerfile and compose templates.
-  wireguard               = false
+  wireguard                  = false
+  # Deadline, from the app's start, for aeth-ext to write its health-check declarations (the
+  # heartbeat's first tick). Past it the supervisor stops the app.
+  health_checks_timeout_secs = 300
 
 [tool.poe]
   include_script = [{ script = "aeth_devkit:tasks", executor = { type = "uv", frozen = true } }]
