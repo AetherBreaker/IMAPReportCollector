@@ -1,6 +1,6 @@
 [project]
   name            = "imap-report-collector"
-  version         = "3.0.9"
+  version         = "3.0.10"
   requires-python = ">=3.14"
   dependencies    = [
     "aeth-ext[sftp, async]>=10.2.0",
